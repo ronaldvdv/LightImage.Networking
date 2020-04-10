@@ -1,0 +1,70 @@
+bin/
+obj/
+temp/
+
+# Log files
+*.log
+
+# Never ignore Asset meta data
+!/[Aa]ssets/**/*.meta
+
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Unity3D Generated File On Crash Reports
+sysinfo.txt
+
+# Builds
+*.apk
+*.unitypackage
+
+# Visual studio migrations
+MigrationBackup/
+
+# Visual Studio cache directory
+.vs/
+
+# XML documentation
+doc/
+
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+Assets/AssetStoreTools*
+
+# Ignore NuGet Packages
+*.nupkg
+
+# The packages folder can be ignored because of Package Restore
+**/[Pp]ackages/*
+!**/[Pp]ackages/manifest.json
+
+# except build/, which is used as an MSBuild target.
+!**/[Pp]ackages/build/
+
+# Uncomment if necessary however generally it will be regenerated when needed
+!**/[Pp]ackages/repositories.config
+
+# Do not commit LightImage-DLLs as they are rebuilt automatically
+LightImage.Grph.Unity/*.csproj
+LightImage.Grph.Unity/Assets/Grph*
+LightImage.Grph.Unity/Assets/unity.config.json
+LightImage.Grph.Unity/LightImage.Grph.Unity.userprefs
+LightImage.Grph.Unity/Logs/
+LightImage.Grph.Properties.Library/Output/
+LightImage.Grph.Properties.Library/State.cs
+LightImage.Grph.Properties.Library/List.cs
+LightImage.Grph.Properties.Library/Calculator.cs
+
+!**/Assets/**/*.obj
+
+*.local.json
+LightImage.Grph.Unity/Config/grph.json
+LightImage.Grph.Unity/Assets/TextMesh Pro/Documentation/
+LightImage.Grph.Unity/ProjectSettings/ProjectVersion.txt
+xmldoc/
+*.diagsession
