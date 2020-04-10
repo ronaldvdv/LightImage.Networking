@@ -1,0 +1,25 @@
+﻿<Window x:Class="LightImage.FileSharing.Tests.ClientApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LightImage.FileSharing.Tests.ClientApp"
+        mc:Ignorable="d"
+        Title="FileShare Client" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <DataGrid ItemsSource="{Binding Files}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Width="50" Binding="{Binding Id}" />
+                <DataGridTextColumn Header="Path" Width="300" Binding="{Binding Path}" />
+                <DataGridTextColumn Header="Hash" Width="100" Binding="{Binding Hash}" />
+                <DataGridTextColumn Header="Size" Width="50" Binding="{Binding FileSize}" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <TextBox x:Name="LogTextBox" Grid.Column="1">
+        </TextBox>
+    </Grid>
+</Window>
