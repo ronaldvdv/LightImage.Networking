@@ -11,6 +11,7 @@
     <RepositoryUrl>https://github.com/ronaldvdv/LightImage.Networking</RepositoryUrl>
     <NeutralLanguage>English</NeutralLanguage>
     <Copyright>(c) 2020 Light Image</Copyright>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -13,15 +13,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.Servi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.Services.Tests", "LightImage.Networking.Services.Tests\LightImage.Networking.Services.Tests.csproj", "{D617E969-E891-4A5D-936E-E2CABC8BA588}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.FileSharing", "LightImage.FileSharing\LightImage.FileSharing.csproj", "{B1A66ABB-DB71-4DFB-9B49-5CCCE0398B3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.FileSharing", "LightImage.Networking.FileSharing\LightImage.Networking.FileSharing.csproj", "{B1A66ABB-DB71-4DFB-9B49-5CCCE0398B3D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.FileSharing.Tests", "LightImage.FileSharing.Tests\LightImage.FileSharing.Tests.csproj", "{48A01192-156B-4BC9-8294-8998EE00287A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.FileSharing.Tests", "LightImage.Networking.FileSharing.Tests\LightImage.Networking.FileSharing.Tests.csproj", "{48A01192-156B-4BC9-8294-8998EE00287A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightImage.FileSharing.Tests.ClientApp", "LightImage.FileSharing.Tests.ClientApp\LightImage.FileSharing.Tests.ClientApp.csproj", "{3A6EC5C7-1288-4BE5-8BE9-9D55473FB7C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightImage.Networking.FileSharing.Tests.ClientApp", "LightImage.Networking.FileSharing.Tests.ClientApp\LightImage.Networking.FileSharing.Tests.ClientApp.csproj", "{3A6EC5C7-1288-4BE5-8BE9-9D55473FB7C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightImage.FileSharing.Tests.ServerApp", "LightImage.FileSharing.Tests.Server\LightImage.FileSharing.Tests.ServerApp.csproj", "{2A8C7B13-075B-4804-8020-FA30B9D0D6CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightImage.Networking.FileSharing.Tests.ServerApp", "LightImage.Networking.FileSharing.Tests.Server\LightImage.Networking.FileSharing.Tests.ServerApp.csproj", "{2A8C7B13-075B-4804-8020-FA30B9D0D6CB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.FileSharing.Tests.Shared", "LightImage.FileSharing.Tests.Shared\LightImage.FileSharing.Tests.Shared.csproj", "{153661C9-1FAD-49A4-9216-F8A92E2404ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.FileSharing.Tests.Shared", "LightImage.Networking.FileSharing.Tests.Shared\LightImage.Networking.FileSharing.Tests.Shared.csproj", "{153661C9-1FAD-49A4-9216-F8A92E2404ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
