@@ -10,11 +10,12 @@ namespace LightImage.Networking.Discovery.Tests
     {
         private readonly List<Peer> _peers = new List<Peer>();
 
-        public FakeService(string name, string role, int[] ports)
+        public FakeService(string name, string role, int[] ports, ServiceClusterBehaviour clusterBehaviour = ServiceClusterBehaviour.Session)
         {
             Name = name;
             Role = role;
             Ports = ports;
+            ClusterBehaviour = clusterBehaviour;
             Peers = _peers.AsReadOnly();
         }
 
@@ -24,6 +25,7 @@ namespace LightImage.Networking.Discovery.Tests
 
 #pragma warning restore 67
 
+        public ServiceClusterBehaviour ClusterBehaviour { get; }
         public string Name { get; }
 
         public ReadOnlyCollection<Peer> Peers { get; }

@@ -185,7 +185,7 @@ namespace LightImage.Networking.Discovery
             var add = _peers.Values.Where(p => p.Session == session && session != C_NO_SESSION).ToArray();
             foreach (var peer in add)
             {
-                foreach (var service in peer.Services)
+                foreach (var service in peer.Services.Where(p => p.ClusterBehaviour == ServiceClusterBehaviour.Session))
                 {
                     ConnectService(service, peer);
                 }
@@ -245,7 +245,7 @@ namespace LightImage.Networking.Discovery
         private void HandlePeerEnteredSession(Peer peer)
         {
             _logger.LogTrace(DiscoveryEvents.PeerEnteredSession, "Peer {id} entered the current session {session}", peer.Id, _session);
-            foreach (var service in peer.Services)
+            foreach (var service in peer.Services.Where(s => s.ClusterBehaviour == ServiceClusterBehaviour.Session))
             {
                 ConnectService(service, peer);
             }
@@ -259,7 +259,7 @@ namespace LightImage.Networking.Discovery
         private void HandlePeerLeftSession(Peer peer)
         {
             _logger.LogTrace(DiscoveryEvents.PeerLeftSession, "Peer {id} left the current session {session}", peer.Id, _session);
-            foreach (var service in peer.Services)
+            foreach (var service in peer.Services.Where(s => s.ClusterBehaviour == ServiceClusterBehaviour.Session))
             {
                 DisconnectService(service, peer);
             }
@@ -375,7 +375,7 @@ namespace LightImage.Networking.Discovery
 
                 _logger.LogInformation(DiscoveryEvents.ServiceReceived, "Received service {service} for {peer}; role {role}, ports {ports}", service.Name, id, service.Role, service.Ports);
 
-                if (_session != C_NO_SESSION && peer.Session == _session)
+                if (service.ClusterBehaviour == ServiceClusterBehaviour.Always || (_session != C_NO_SESSION && peer.Session == _session))
                 {
                     ConnectService(service, peer);
                 }
