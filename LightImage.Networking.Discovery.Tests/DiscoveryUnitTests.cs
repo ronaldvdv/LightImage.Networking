@@ -1,7 +1,6 @@
 using LightImage.Networking.Discovery.Events;
 using LightImage.Networking.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NetMQ;
@@ -39,7 +38,7 @@ namespace LightImage.Networking.Discovery.Tests
             _dealer?.Dispose();
             _beacon.Dispose();
             _router.Dispose();
-            NetMQConfig.Cleanup();
+            NetMQConfig.Cleanup(true);
             _loggerFactory.Dispose();
         }
 
@@ -169,6 +168,7 @@ namespace LightImage.Networking.Discovery.Tests
             var service = ServiceData.Parse(msg.Last.Buffer);
             Assert.AreEqual("TestService", service.Name);
             Assert.AreEqual("MyRole", service.Role);
+            Assert.AreEqual(fakeService.ClusterBehaviour, service.ClusterBehaviour);
             Assert.IsTrue(service.Ports.SequenceEqual(new int[] { 3, 4 }));
         }
 
@@ -187,9 +187,11 @@ namespace LightImage.Networking.Discovery.Tests
         }
 
         [TestMethod]
-        public void TestNodeDisconnectsServiceOnPeerLeavesSession()
+        [DataRow(ServiceClusterBehaviour.Always, false)]
+        [DataRow(ServiceClusterBehaviour.Session, true)]
+        public void TestNodeDisconnectsServiceOnPeerLeavesSession(ServiceClusterBehaviour behaviour, bool expectLeave)
         {
-            var fakeService = new FakeService("TestService", "MyRole", new int[] { 3, 4 });
+            var fakeService = new FakeService("TestService", "MyRole", new int[] { 3, 4 }, behaviour);
             _services.Setup(sm => sm.GetDescriptors()).Returns(new[] { fakeService });
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 4, EvasiveThreshold = C_TIMEOUT_SMALL, LostThreshold = C_TIMEOUT_SMALL * 10 };
             int session = 1;
@@ -214,7 +216,7 @@ namespace LightImage.Networking.Discovery.Tests
 
             _dealer = new DealerSocket($"tcp://{host}:{beacon.Port}");
             _dealer.Options.Identity = _id.ToIdentity();
-            _dealer.SendHelloMessage(new BeaconData(_id, _port, session, 0).ToByteArray(), "", host, "", false, new[] { new ServiceData(fakeService.Name, fakeService.Role, fakeService.Ports) });
+            _dealer.SendHelloMessage(new BeaconData(_id, _port, session, 0).ToByteArray(), "", host, "", false, new[] { new ServiceData(fakeService.Name, fakeService.Role, fakeService.Ports, fakeService.ClusterBehaviour) });
 
             Thread.Sleep(C_TIMEOUT_SMALL);
 
@@ -222,7 +224,7 @@ namespace LightImage.Networking.Discovery.Tests
             _beacon.Publish(new BeaconData(_id, _port, session + 1, session).ToByteArray(), C_TIMEOUT_SMALL / 2);
 
             Assert.IsTrue(mre.Wait(C_TIMEOUT_SMALL));
-            _services.Verify(sm => sm.Disconnect(_id, fakeService.Name));
+            _services.Verify(sm => sm.Disconnect(_id, fakeService.Name), expectLeave ? Times.Once() : Times.Never());
         }
 
         [TestMethod]
@@ -292,7 +294,7 @@ namespace LightImage.Networking.Discovery.Tests
             _node.ServiceDiscovered += (sender, args) => e.Set();
 
             // Say HELLO with one service, in the same session
-            _dealer.SendHelloMessage(new BeaconData(_id, _port, session, 0).ToByteArray(), "", host, "", true, new[] { new ServiceData(fakeService.Name, fakeService.Role, fakeService.Ports) });
+            _dealer.SendHelloMessage(new BeaconData(_id, _port, session, 0).ToByteArray(), "", host, "", true, new[] { new ServiceData(fakeService.Name, fakeService.Role, fakeService.Ports, fakeService.ClusterBehaviour) });
 
             // Now see if the fake service is notified
             Assert.IsTrue(e.Wait(C_TIMEOUT_SMALL));

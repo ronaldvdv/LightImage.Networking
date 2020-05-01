@@ -22,6 +22,11 @@ namespace LightImage.Networking.Services
         public event EventHandler<ServicePeerHeartbeatEventArgs> PeerHeartbeat;
 
         /// <summary>
+        /// Gets the clustering behaviour of this service.
+        /// </summary>
+        public virtual ServiceClusterBehaviour ClusterBehaviour => ServiceClusterBehaviour.Session;
+
+        /// <summary>
         /// Gets the name of this service.
         /// </summary>
         public string Name { get; }

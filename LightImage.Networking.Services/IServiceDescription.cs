@@ -6,6 +6,11 @@
     public interface IServiceDescription
     {
         /// <summary>
+        /// Gets the clustering behaviour of the service.
+        /// </summary>
+        ServiceClusterBehaviour ClusterBehaviour { get; }
+
+        /// <summary>
         /// Gets the unique name that can be used to recognize the service.
         /// </summary>
         string Name { get; }

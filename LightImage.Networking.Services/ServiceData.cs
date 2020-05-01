@@ -14,12 +14,17 @@ namespace LightImage.Networking.Services
         /// <param name="name">Name of the service.</param>
         /// <param name="role">Role of the node in this service.</param>
         /// <param name="ports">Ports at which the service is running.</param>
-        public ServiceData(string name, string role, int[] ports)
+        /// <param name="clusterBehaviour">Clustering behaviour of the service.</param>
+        public ServiceData(string name, string role, int[] ports, ServiceClusterBehaviour clusterBehaviour)
         {
             Name = name ?? string.Empty;
             Role = role ?? string.Empty;
             Ports = ports ?? new int[] { };
+            ClusterBehaviour = clusterBehaviour;
         }
+
+        /// <inheritdoc/>
+        public ServiceClusterBehaviour ClusterBehaviour { get; }
 
         /// <inheritdoc/>
         public string Name { get; }
@@ -43,6 +48,7 @@ namespace LightImage.Networking.Services
                 {
                     var name = reader.ReadString();
                     var role = reader.ReadString();
+                    var clusterBehaviour = (ServiceClusterBehaviour)reader.ReadInt32();
                     var portCount = reader.ReadByte();
                     var ports = new int[portCount];
                     for (var i = 0; i < portCount; i++)
@@ -50,7 +56,7 @@ namespace LightImage.Networking.Services
                         ports[i] = reader.ReadInt32();
                     }
 
-                    return new ServiceData(name, role, ports);
+                    return new ServiceData(name, role, ports, clusterBehaviour);
                 }
             }
         }
@@ -67,6 +73,7 @@ namespace LightImage.Networking.Services
                 {
                     writer.Write(Name);
                     writer.Write(Role);
+                    writer.Write((int)ClusterBehaviour);
                     writer.Write((byte)Ports.Length);
                     foreach (var port in Ports)
                     {

@@ -124,7 +124,7 @@ namespace LightImage.Networking.Discovery
             for (int i = services.Length - 1; i >= 0; i--)
             {
                 var service = services[i];
-                socket.SendFrame(new ServiceData(service.Name, service.Role, service.Ports).ToByteArray(), i > 0);
+                socket.SendFrame(new ServiceData(service.Name, service.Role, service.Ports, service.ClusterBehaviour).ToByteArray(), i > 0);
             }
         }
 
