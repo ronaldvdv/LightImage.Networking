@@ -2,6 +2,7 @@
 using System.Linq;
 using LightImage.Networking.Services;
 using LightImage.Util;
+using LightImage.Util.Collections;
 using NetMQ;
 
 namespace LightImage.Networking.Discovery

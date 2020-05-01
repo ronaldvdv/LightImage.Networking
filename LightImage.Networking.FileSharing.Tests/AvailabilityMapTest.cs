@@ -8,7 +8,7 @@ namespace LightImage.Networking.FileSharing.Tests
     [TestClass]
     public class AvailabilityMapTest
     {
-        private RetryPolicy _policy = RetryPolicy.Exponential(int.MaxValue, MS(10), 2, MS(40));
+        private RetryPolicy _policy = RetryPolicy.Exponential(int.MaxValue, MS(20), 2, MS(80));
 
         [TestMethod]
         public void TestAvailabilityExpiresOnRemove()
@@ -27,9 +27,8 @@ namespace LightImage.Networking.FileSharing.Tests
             var id = Guid.NewGuid();
             map.Set(id, false);
             map.Set(id, false);
-            Task.Delay(MS(15)).Wait();
             Assert.AreEqual(Availability.Unavailable, map.Get(id));
-            Task.Delay(MS(10)).Wait();
+            Task.Delay(MS(20)).Wait();
             Assert.AreEqual(Availability.AvailabilityExpired, map.Get(id), "Unavailability should expire");
         }
 
@@ -43,10 +42,10 @@ namespace LightImage.Networking.FileSharing.Tests
         [TestMethod]
         public void TestPolicy()
         {
-            Assert.AreEqual(MS(10), _policy.GetInterval(0));
-            Assert.AreEqual(MS(20), _policy.GetInterval(1));
-            Assert.AreEqual(MS(40), _policy.GetInterval(2));
-            Assert.AreEqual(MS(40), _policy.GetInterval(3));
+            Assert.AreEqual(MS(20), _policy.GetInterval(0));
+            Assert.AreEqual(MS(40), _policy.GetInterval(1));
+            Assert.AreEqual(MS(80), _policy.GetInterval(2));
+            Assert.AreEqual(MS(80), _policy.GetInterval(3));
         }
 
         [TestMethod]
@@ -92,7 +91,7 @@ namespace LightImage.Networking.FileSharing.Tests
             map.Set(id, false);
             map.Set(id, true);
             map.Set(id, false);
-            Task.Delay(MS(15)).Wait();
+            Task.Delay(MS(30)).Wait();
             Assert.AreEqual(Availability.AvailabilityExpired, map.Get(id), "Unavailable expiry should reset");
         }
 

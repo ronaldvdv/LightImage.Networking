@@ -116,10 +116,6 @@
       <Project>{0b98bb7d-e73b-4a37-933c-38e83827149d}</Project>
       <Name>LightImage.Networking.Services</Name>
     </ProjectReference>
-    <ProjectReference Include="..\LightImage.Util\LightImage.Util.csproj">
-      <Project>{b97a8ce7-a438-40d5-9d48-55efd5c1e7ed}</Project>
-      <Name>LightImage.Util</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Autofac">

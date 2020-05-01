@@ -74,7 +74,8 @@ namespace LightImage.Networking.FileSharing
             {
                 if (IsAvailable)
                     return Availability.Available;
-                if (DateTime.Now > Expires)
+                var now = DateTime.Now;
+                if (now > Expires)
                     return Availability.AvailabilityExpired;
                 return Availability.Unavailable;
             }
