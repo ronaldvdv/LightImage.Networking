@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Sockets;
 using NetMQ;
 
 namespace LightImage.Networking.Services
@@ -86,38 +87,58 @@ namespace LightImage.Networking.Services
         /// <summary>
         /// Send a CONNECT message to the shim.
         /// </summary>
-        /// <param name="socket">Shim socket.</param>
+        /// <param name="sender">Shim socket.</param>
         /// <param name="id">Unique identifier of the peer.</param>
         /// <param name="endpoint">Endpoint of the peer.</param>
         /// <param name="role">Role of the peer within the service.</param>
-        public static void SendConnect(IOutgoingSocket socket, Guid id, string endpoint, string role)
+        public static void SendConnect(IOutgoingSender sender, Guid id, string endpoint, string role)
         {
-            socket.SendMoreFrame(C_CMD_CONNECT);
-            socket.SendMoreFrame(id.ToByteArray());
-            socket.SendMoreFrame(endpoint);
-            socket.SendFrame(role ?? string.Empty);
+            sender.Send(socket =>
+            {
+                socket.SendMoreFrame(C_CMD_CONNECT);
+                socket.SendMoreFrame(id.ToByteArray());
+                socket.SendMoreFrame(endpoint);
+                socket.SendFrame(role ?? string.Empty);
+            });
         }
 
         /// <summary>
         /// Send a DISCONNECT message to the shim.
         /// </summary>
-        /// <param name="socket">Shim socket.</param>
+        /// <param name="sender">Shim socket.</param>
         /// <param name="id">Unique identifier of the peer.</param>
-        public static void SendDisconnect(IOutgoingSocket socket, Guid id)
+        public static void SendDisconnect(IOutgoingSender sender, Guid id)
         {
-            socket.SendMoreFrame(C_CMD_DISCONNECT);
-            socket.SendFrame(id.ToByteArray());
+            sender.Send(socket =>
+            {
+                socket.SendMoreFrame(C_CMD_DISCONNECT);
+                socket.SendFrame(id.ToByteArray());
+            });
         }
 
         /// <summary>
         /// Send a HEARTBEAT event to the service.
         /// </summary>
-        /// <param name="socket">Shim socket.</param>
+        /// <param name="sender">Shim socket.</param>
         /// <param name="nodeId">Unique identifier of the peer node.</param>
-        public static void SendHeartbeat(IOutgoingSocket socket, Guid nodeId)
+        public static void SendHeartbeat(IOutgoingSender sender, Guid nodeId)
         {
-            socket.SendMoreFrame(C_EVT_HEARTBEAT);
-            socket.SendFrame(nodeId.ToByteArray());
+            sender.Send(socket =>
+            {
+                socket.SendMoreFrame(C_EVT_HEARTBEAT);
+                socket.SendFrame(nodeId.ToByteArray());
+            });
+        }
+
+        /// <summary>
+        /// Send a HELLO message to a peer.
+        /// </summary>
+        /// <param name="sender">Peer socket.</param>
+        /// <param name="endpoint">Endpoint of the owning (sending) node.</param>
+        /// <param name="role">Role of the owning (sending) node.</param>
+        public static void SendHello(IOutgoingSender sender, string endpoint, string role)
+        {
+            sender.Send(socket => socket.SendHello(endpoint, role));
         }
 
         /// <summary>
@@ -126,7 +147,7 @@ namespace LightImage.Networking.Services
         /// <param name="socket">Peer socket.</param>
         /// <param name="endpoint">Endpoint of the owning (sending) node.</param>
         /// <param name="role">Role of the owning (sending) node.</param>
-        public static void SendHello(IOutgoingSocket socket, string endpoint, string role)
+        public static void SendHello(this IOutgoingSocket socket, string endpoint, string role)
         {
             socket.SendMoreFrame(C_MSG_HELLO);
             socket.SendMoreFrame(endpoint);
@@ -136,10 +157,13 @@ namespace LightImage.Networking.Services
         /// <summary>
         /// Send a RESET message to the shim.
         /// </summary>
-        /// <param name="socket">Shim socket.</param>
-        public static void SendReset(IOutgoingSocket socket)
+        /// <param name="sender">Shim socket sender.</param>
+        public static void SendReset(IOutgoingSender sender)
         {
-            socket.SendFrame(C_CMD_RESET);
+            sender.Send(socket =>
+            {
+                socket.SendFrame(C_CMD_RESET);
+            });
         }
     }
 }
