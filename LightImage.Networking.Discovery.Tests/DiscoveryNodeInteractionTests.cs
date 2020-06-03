@@ -12,6 +12,7 @@ namespace LightImage.Networking.Discovery.Tests
     public class DiscoveryNodeInteractionTests
     {
         private readonly List<DiscoveryNode> _nodes = new List<DiscoveryNode>();
+        private readonly TimeSpan C_SMALL_TIMEOUT = TimeSpan.FromSeconds(0.1);
         private ILogger<DiscoveryNode> _logger;
         private ILoggerFactory _loggerFactory;
         private DiscoveryOptions _options;
@@ -19,7 +20,6 @@ namespace LightImage.Networking.Discovery.Tests
         private FakeService _service2;
         private FakeService _service3;
         private ILogger<DiscoveryShim> _shimLogger;
-        private TimeSpan C_SMALL_TIMEOUT = TimeSpan.FromSeconds(0.1);
 
         [TestCleanup]
         public void Cleanup()

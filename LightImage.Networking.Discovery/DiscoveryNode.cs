@@ -16,12 +16,17 @@ namespace LightImage.Networking.Discovery
     /// <summary>
     /// Node that can discover other nodes and their services over a network.
     /// </summary>
-    internal partial class DiscoveryNode : AbstractNode, IDiscoveryNode
+    public partial class DiscoveryNode : AbstractNode, IDiscoveryNode
     {
         /// <summary>
         /// Session number to be used when the node has not joined any session.
         /// </summary>
         public const int C_NO_SESSION = 0;
+
+        /// <summary>
+        /// Actor managing the internal shim handler.
+        /// </summary>
+        private readonly NetMQActor _actor;
 
         /// <summary>
         /// Logger for this node.
@@ -34,6 +39,11 @@ namespace LightImage.Networking.Discovery
         private readonly Dictionary<Guid, Peer> _peers = new Dictionary<Guid, Peer>();
 
         /// <summary>
+        /// Poller used to listen for feedback from the shim.
+        /// </summary>
+        private readonly NetMQPoller _poller;
+
+        /// <summary>
         /// Services exposed by the node.
         /// </summary>
         private readonly IServiceManager _services;
@@ -44,19 +54,9 @@ namespace LightImage.Networking.Discovery
         private readonly TaskFactory _taskFactory;
 
         /// <summary>
-        /// Actor managing the internal shim handler.
-        /// </summary>
-        private NetMQActor _actor;
-
-        /// <summary>
         /// Value indicating whether the node is currently running.
         /// </summary>
         private bool _isActive = false;
-
-        /// <summary>
-        /// Poller used to listen for feedback from the shim.
-        /// </summary>
-        private NetMQPoller _poller;
 
         /// <summary>
         /// Current session of the node.
@@ -226,7 +226,7 @@ namespace LightImage.Networking.Discovery
                     break;
 
                 case DiscoveryMessages.C_EVT_JOIN:
-                    int session = msg[1].ConvertToInt32();
+                    var session = msg[1].ConvertToInt32();
                     Join(session);
                     break;
             }
@@ -313,7 +313,7 @@ namespace LightImage.Networking.Discovery
 
         private void ProcessPeerStatus(PeerStatusData data)
         {
-            bool exists = _peers.TryGetValue(data.Id, out var peer);
+            var exists = _peers.TryGetValue(data.Id, out var peer);
             _logger.LogTrace(DiscoveryEvents.PeerUpdated, "Peer {id} at {host} changed status to {status}, session {session}, name {name}, type {type}", data.Id, data.Host, data.Status, data.Session, data.Name, data.Type);
 
             switch (data.Status)
@@ -375,7 +375,7 @@ namespace LightImage.Networking.Discovery
 
                 _logger.LogInformation(DiscoveryEvents.ServiceReceived, "Received service {service} for {peer}; role {role}, ports {ports}", service.Name, id, service.Role, service.Ports);
 
-                if (service.ClusterBehaviour == ServiceClusterBehaviour.Always || (_session != C_NO_SESSION && peer.Session == _session))
+                if (service.ClusterBehaviour == ServiceClusterBehaviour.Global || (_session != C_NO_SESSION && peer.Session == _session))
                 {
                     ConnectService(service, peer);
                 }

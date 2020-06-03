@@ -12,9 +12,15 @@ namespace LightImage.Networking.Discovery
     /// <summary>
     /// Shim handler for the actor running the discovery process.
     /// </summary>
-    internal partial class DiscoveryShim : IShimHandler
+    public partial class DiscoveryShim : IShimHandler
     {
         private readonly ILogger<DiscoveryShim> _logger;
+
+        /// <summary>
+        /// Descriptive name for this node (typically the software component).
+        /// </summary>
+        private readonly string _name;
+
         private readonly DiscoveryOptions _options;
 
         /// <summary>
@@ -26,6 +32,11 @@ namespace LightImage.Networking.Discovery
         /// Descriptions of services.
         /// </summary>
         private readonly IServiceDescription[] _services;
+
+        /// <summary>
+        /// Type of this node.
+        /// </summary>
+        private readonly string _type;
 
         /// <summary>
         /// UDP beacon publishing our router port and unique ID.
@@ -41,11 +52,6 @@ namespace LightImage.Networking.Discovery
         /// Unique identifier for the node.
         /// </summary>
         private Guid _id;
-
-        /// <summary>
-        /// Descriptive name for this node (typically the software component).
-        /// </summary>
-        private string _name;
 
         /// <summary>
         /// Poller orchestrating incoming messages.
@@ -68,11 +74,6 @@ namespace LightImage.Networking.Discovery
         private int _session;
 
         private PairSocket _shim;
-
-        /// <summary>
-        /// Type of this node.
-        /// </summary>
-        private string _type;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscoveryShim"/> class.
@@ -184,7 +185,7 @@ namespace LightImage.Networking.Discovery
 
         private Peer FindPeer(NetMQFrame identity)
         {
-            byte[] buffer = new byte[16];
+            var buffer = new byte[16];
             Array.Copy(identity.Buffer, 1, buffer, 0, 16);
             var id = new Guid(buffer);
             return FindPeer(id);
@@ -252,7 +253,7 @@ namespace LightImage.Networking.Discovery
                     var name = msg[3].ConvertToString();
                     var host = msg[4].ConvertToString();
                     var type = msg[5].ConvertToString();
-                    bool forceHandshake = BitConverter.ToInt32(msg[6].Buffer, 0) == 1;
+                    var forceHandshake = BitConverter.ToInt32(msg[6].Buffer, 0) == 1;
                     peer = ProcessBeacon(beacon, host, name, type, forceHandshake);
 
                     var services = msg.Skip(7).ToArray();
@@ -333,7 +334,7 @@ namespace LightImage.Networking.Discovery
             var peer = FindPeer(id);
             if (peer != null)
             {
-                bool evasive = peer.Status == PeerStatus.Evasive;
+                var evasive = peer.Status == PeerStatus.Evasive;
                 peer.MarkAlive();
                 if (evasive)
                 {
@@ -345,7 +346,7 @@ namespace LightImage.Networking.Discovery
         private Peer ProcessBeacon(BeaconData data, string host, string name = null, string type = null, bool forceHandshake = false)
         {
             var peer = FindPeer(data.Id);
-            bool sendEvent = false;
+            var sendEvent = false;
             if (peer != null)
             {
                 if (data.Port > 0)

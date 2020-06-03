@@ -3,7 +3,7 @@
     /// <summary>
     /// Constants for peer connectivity status.
     /// </summary>
-    internal enum PeerStatus
+    public enum PeerStatus
     {
         /// <summary>
         /// The peer is known to be connected.

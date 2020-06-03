@@ -10,7 +10,7 @@
     <NeutralLanguage>English</NeutralLanguage>
     <RepositoryUrl>https://github.com/ronaldvdv/LightImage.Networking</RepositoryUrl>
     <PackageTags>netmq,services,actors,discovery,network,protocol</PackageTags>
-    <Version>1.1-alpha</Version>
+    <Version>1.12.0-alpha</Version>
     <PackageIcon>logo.png</PackageIcon>
   </PropertyGroup>
 

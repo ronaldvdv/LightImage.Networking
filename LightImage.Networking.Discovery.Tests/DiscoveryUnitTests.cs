@@ -15,6 +15,8 @@ namespace LightImage.Networking.Discovery.Tests
     [TestClass]
     public partial class DiscoveryUnitTests
     {
+        private readonly Mock<IServiceManager> _services = new Mock<IServiceManager>();
+        private readonly TimeSpan C_TIMEOUT_SMALL = TimeSpan.FromSeconds(0.2);
         private NetMQBeacon _beacon;
         private DealerSocket _dealer;
         private Guid _id;
@@ -24,9 +26,7 @@ namespace LightImage.Networking.Discovery.Tests
         private NetMQPoller _poller;
         private int _port;
         private RouterSocket _router;
-        private Mock<IServiceManager> _services = new Mock<IServiceManager>();
         private ILogger<DiscoveryShim> _shimLogger;
-        private TimeSpan C_TIMEOUT_SMALL = TimeSpan.FromSeconds(0.2);
 
         [TestCleanup]
         public void CleanUp()
@@ -187,14 +187,14 @@ namespace LightImage.Networking.Discovery.Tests
         }
 
         [TestMethod]
-        [DataRow(ServiceClusterBehaviour.Always, false)]
+        [DataRow(ServiceClusterBehaviour.Global, false)]
         [DataRow(ServiceClusterBehaviour.Session, true)]
         public void TestNodeDisconnectsServiceOnPeerLeavesSession(ServiceClusterBehaviour behaviour, bool expectLeave)
         {
             var fakeService = new FakeService("TestService", "MyRole", new int[] { 3, 4 }, behaviour);
             _services.Setup(sm => sm.GetDescriptors()).Returns(new[] { fakeService });
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 4, EvasiveThreshold = C_TIMEOUT_SMALL, LostThreshold = C_TIMEOUT_SMALL * 10 };
-            int session = 1;
+            var session = 1;
             _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, options);
             _node.Join(session);
             _poller.RunAsync();

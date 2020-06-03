@@ -7,16 +7,16 @@ namespace LightImage.Networking.Discovery
     /// <summary>
     /// Shim handler for the actor running the discovery process.
     /// </summary>
-    internal partial class DiscoveryShim
+    public partial class DiscoveryShim
     {
         /// <summary>
         /// Description of a connected peer in the discovery process.
         /// </summary>
         protected class Peer : AbstractNode, IDisposable
         {
+            private readonly DealerSocket _dealer;
             private readonly DiscoveryShim _shim;
             private string _address;
-            private DealerSocket _dealer;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Peer"/> class.
@@ -128,7 +128,7 @@ namespace LightImage.Networking.Discovery
             {
                 LastSeen = DateTime.Now;
 
-                bool changed = false;
+                var changed = false;
 
                 if (Sequence > sequence)
                 {

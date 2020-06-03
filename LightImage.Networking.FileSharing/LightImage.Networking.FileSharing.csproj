@@ -10,7 +10,7 @@
     <PackageTags>netmq,services,actors,discovery,network,protocol,exchange,files,transfers,p2p</PackageTags>
     <NeutralLanguage>English</NeutralLanguage>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1-alpha</Version>
+    <Version>1.12.0-alpha</Version>
     <PackageIcon>logo.png</PackageIcon>
   </PropertyGroup>
 

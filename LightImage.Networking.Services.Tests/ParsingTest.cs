@@ -7,10 +7,10 @@ namespace LightImage.Networking.Services.Tests
     [TestClass]
     public class ParsingTest
     {
-        private const ServiceClusterBehaviour C_BEHAVIOUR = ServiceClusterBehaviour.Always;
+        private const ServiceClusterBehaviour C_BEHAVIOUR = ServiceClusterBehaviour.Global;
         private const string C_NAME = "My Service";
         private const string C_ROLE = "The Role";
-        private int[] C_PORTS = new[] { 17, 3, 8, 6 };
+        private readonly int[] C_PORTS = new[] { 17, 3, 8, 6 };
 
         [TestMethod]
         public void TestGuidEncoding()
