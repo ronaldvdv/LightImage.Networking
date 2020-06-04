@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NetMQ;
@@ -21,10 +22,8 @@ namespace LightImage.Networking.Services
         private readonly TaskFactory _taskFactory;
 
         private NetMQActor _actor;
-
         private NetMQPoller _poller;
-
-        private NetMQQueue<NetMQMessage> _queue;
+        private MessageQueueSender _sender;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClusterService{TShim, TShimPeer}"/> class.
@@ -63,7 +62,7 @@ namespace LightImage.Networking.Services
         /// <summary>
         /// Gets a way to send messages to the actor which runs the see <see cref="ClusterShim{TPeer}"/>.
         /// </summary>
-        protected IOutgoingSender Actor { get; private set; }
+        protected IOutgoingSender Actor => _sender;
 
         /// <inheritdoc/>
         public override void Add(Guid id, string host, string role, int[] ports)
@@ -125,15 +124,13 @@ namespace LightImage.Networking.Services
 
             var shim = CreateShim();
             _actor = NetMQActor.Create(shim);
-            _queue = new NetMQQueue<NetMQMessage>();
             _actor.ReceiveReady += HandleActor_ReceiveReady;
-            _queue.ReceiveReady += HandleQueue_ReceiveReady;
-            Actor = new MessageQueueSender(_queue);
+            _sender = new MessageQueueSender(_actor);
 
             var port = BitConverter.ToInt32(_actor.ReceiveFrameBytes(), 0);
             SetPorts(port);
 
-            _poller = new NetMQPoller { _actor, _queue };
+            _poller = new NetMQPoller { _actor, _sender };
             Setup(_poller);
             _poller.RunAsync();
 
@@ -154,7 +151,7 @@ namespace LightImage.Networking.Services
 
             _poller.Stop();
             _poller.Dispose();
-            _queue.Dispose();
+            _sender.Dispose();
             _actor.Dispose();
         }
 
@@ -248,12 +245,6 @@ namespace LightImage.Networking.Services
 
                 HandleActorEvent(cmd, msg);
             });
-        }
-
-        private void HandleQueue_ReceiveReady(object sender, NetMQQueueEventArgs<NetMQMessage> e)
-        {
-            var msg = _queue.Dequeue();
-            _actor.SendMultipartMessage(msg);
         }
 
         private void Remove(ServicePeer peer)

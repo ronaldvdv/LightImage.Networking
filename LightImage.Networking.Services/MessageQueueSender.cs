@@ -4,15 +4,29 @@ using NetMQ;
 
 namespace LightImage.Networking.Services
 {
-    internal class MessageQueueSender : IOutgoingSender
+    public class MessageQueueSender : IOutgoingSender, ISocketPollable, IDisposable
     {
         private readonly object _gate = new object();
-        private readonly NetMQQueue<NetMQMessage> _queue;
+        private readonly NetMQQueue<NetMQMessage> _queue = new NetMQQueue<NetMQMessage>();
         private readonly Sender _sender = new Sender();
+        private readonly IOutgoingSocket _socket;
 
-        internal MessageQueueSender(NetMQQueue<NetMQMessage> queue)
+        public MessageQueueSender(IOutgoingSocket socket)
         {
-            _queue = queue;
+            _socket = socket;
+            _queue.ReceiveReady += HandleQueue_ReceiveReady;
+        }
+
+        /// <inheritdoc/>
+        bool ISocketPollable.IsDisposed => _queue.IsDisposed;
+
+        /// <inheritdoc/>
+        NetMQSocket ISocketPollable.Socket => ((ISocketPollable)_queue).Socket;
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            _queue.Dispose();
         }
 
         public void Send(Action<IOutgoingSocket> action)
@@ -21,6 +35,16 @@ namespace LightImage.Networking.Services
             {
                 action(_sender);
                 _sender.Queue(_queue);
+            }
+        }
+
+        private void HandleQueue_ReceiveReady(object sender, NetMQQueueEventArgs<NetMQMessage> e)
+        {
+            var msg = _queue.Dequeue();
+            _socket.SendMultipartMessage(msg);
+            foreach (var frame in msg)
+            {
+                BufferPool.Return(frame.Buffer);
             }
         }
 
@@ -36,7 +60,9 @@ namespace LightImage.Networking.Services
                     throw new InvalidOperationException();
                 }
 
-                _frames.Add(new NetMQFrame(msg.Data, msg.Size));
+                var bytes = BufferPool.Take(msg.Size);
+                msg.Data.AsSpan(0, msg.Size).CopyTo(bytes.AsSpan());
+                _frames.Add(new NetMQFrame(bytes, msg.Size));
                 _more = more;
                 return true;
             }
@@ -47,7 +73,9 @@ namespace LightImage.Networking.Services
                 {
                     throw new InvalidOperationException();
                 }
-                queue.Enqueue(new NetMQMessage(_frames));
+
+                var msg = new NetMQMessage(_frames);
+                queue.Enqueue(msg);
                 Reset();
             }
 
