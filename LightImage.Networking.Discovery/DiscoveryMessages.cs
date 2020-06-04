@@ -92,6 +92,16 @@ namespace LightImage.Networking.Discovery
         }
 
         /// <summary>
+        /// Instruct the shim to add an existing peer to the session.
+        /// </summary>
+        /// <param name="sender">Shim socket sender.</param>
+        /// <param name="peer">Unique identifier of the peer to be added.</param>
+        public static void SendAddCommand(this IOutgoingSender sender, Guid peer)
+        {
+            sender.Send(socket => socket.SendAddCommand(peer));
+        }
+
+        /// <summary>
         /// Instruct the shim to mark a peer as alive recently.
         /// </summary>
         /// <param name="socket">Shim socket.</param>
@@ -100,6 +110,16 @@ namespace LightImage.Networking.Discovery
         {
             var peerBytes = _guidFrames.Get(peer, p => p.ToByteArray());
             socket.SendMoreFrame(C_CMD_HEARTBEAT).SendFrame(peerBytes);
+        }
+
+        /// <summary>
+        /// Instruct the shim to mark a peer as alive recently.
+        /// </summary>
+        /// <param name="sender">Shim socket sender.</param>
+        /// <param name="peer">Unique identifier of the peer for which a heartbeat was received.</param>
+        public static void SendHeartbeatCommand(this IOutgoingSender sender, Guid peer)
+        {
+            sender.Send(socket => socket.SendHeartbeatCommand(peer));
         }
 
         /// <summary>
@@ -215,6 +235,16 @@ namespace LightImage.Networking.Discovery
         public static void SendSessionCommand(this IOutgoingSocket socket, int session)
         {
             socket.SendMoreFrame(C_CMD_SESSION).SendFrame(session);
+        }
+
+        /// <summary>
+        /// Instruct the shim to change its session and update its beacon.
+        /// </summary>
+        /// <param name="sender">Shim socket sender.</param>
+        /// <param name="session">New session number.</param>
+        public static void SendSessionCommand(this IOutgoingSender sender, int session)
+        {
+            sender.Send(socket => socket.SendSessionCommand(session));
         }
 
         /// <summary>

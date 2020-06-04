@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 using Autofac;
 using LightImage.Networking.Discovery.Events;
@@ -42,6 +43,11 @@ namespace LightImage.Networking.Discovery
         /// Poller used to listen for feedback from the shim.
         /// </summary>
         private readonly NetMQPoller _poller;
+
+        /// <summary>
+        /// Sender for messages to the actor.
+        /// </summary>
+        private readonly MessageQueueSender _sender;
 
         /// <summary>
         /// Services exposed by the node.
@@ -99,12 +105,14 @@ namespace LightImage.Networking.Discovery
             _actor = NetMQActor.Create(new DiscoveryShim(id, name, type, services.GetDescriptors(), shimLogger, options));
             _actor.ReceiveReady += HandleActorReceiveReady;
 
+            _sender = new MessageQueueSender(_actor);
+
             var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
             _taskFactory = new TaskFactory(scheduler);
 
             _logger.LogInformation(DiscoveryEvents.Initialize, "Starting discovery for {id}, component {name}, type {type}", id, name, type);
 
-            _poller = new NetMQPoller { _actor };
+            _poller = new NetMQPoller { _actor, _sender };
             _isActive = true;
             _poller.RunAsync();
         }
@@ -144,7 +152,7 @@ namespace LightImage.Networking.Discovery
                 throw new InvalidOperationException($"{nameof(Add)} is not valid when not part of a session");
             }
 
-            _actor.SendAddCommand(peer);
+            _sender.SendAddCommand(peer);
             _logger.LogTrace(DiscoveryEvents.AddPeer, "Adding {peer}", peer);
         }
 
@@ -165,6 +173,7 @@ namespace LightImage.Networking.Discovery
             if (!_actor.IsDisposed)
             {
                 _actor.Dispose();
+                _sender.Dispose();
             }
         }
 
@@ -176,7 +185,7 @@ namespace LightImage.Networking.Discovery
                 return;
             }
 
-            _actor.SendSessionCommand(session);
+            _sender.SendSessionCommand(session);
 
             _services.Reset();
 
@@ -253,7 +262,7 @@ namespace LightImage.Networking.Discovery
 
         private void HandlePeerHeartbeat(object sender, ServicePeerHeartbeatEventArgs e)
         {
-            DiscoveryMessages.SendHeartbeatCommand(_actor, e.PeerId);
+            DiscoveryMessages.SendHeartbeatCommand(_sender, e.PeerId);
         }
 
         private void HandlePeerLeftSession(Peer peer)
