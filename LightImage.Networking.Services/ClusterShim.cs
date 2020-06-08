@@ -266,18 +266,24 @@ namespace LightImage.Networking.Services
 
         private void HandleRouterReceiveReady(object sender, NetMQSocketEventArgs e)
         {
-            var msg = e.Socket.ReceiveMultipartMessage();
-            var identity = msg[0].ToIdentityGuid();
-            var cmd = msg[1].ConvertToString();
-            ClusterMessages.SendHeartbeat(Shim, identity);
-            HandleRouterMessage(cmd, msg, identity);
+            var msg = new NetMQMessage();
+            while (e.Socket.TryReceiveMultipartMessage(ref msg))
+            {
+                var identity = msg[0].ToIdentityGuid();
+                var cmd = msg[1].ConvertToString();
+                ClusterMessages.SendHeartbeat(Shim, identity);
+                HandleRouterMessage(cmd, msg, identity);
+            }
         }
 
         private void HandleShimReceiveReady(object sender, NetMQSocketEventArgs e)
         {
-            var msg = e.Socket.ReceiveMultipartMessage();
-            var cmd = msg[0].ConvertToString();
-            HandleShimMessage(cmd, msg);
+            var msg = new NetMQMessage();
+            while (e.Socket.TryReceiveMultipartMessage(ref msg))
+            {
+                var cmd = msg[0].ConvertToString();
+                HandleShimMessage(cmd, msg);
+            }
         }
     }
 }
