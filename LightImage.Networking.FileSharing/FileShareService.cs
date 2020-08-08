@@ -61,7 +61,7 @@ namespace LightImage.Networking.FileSharing
                     break;
 
                 case FileShareMessages.C_EVT_PROGRESS:
-                    FileShareMessages.ParseProgress(msg, out descriptor, out long bytesReceived);
+                    FileShareMessages.ParseProgress(msg, out descriptor, out var bytesReceived);
                     DownloadProgress?.Invoke(this, new DownloadProgressEventArgs(descriptor, bytesReceived));
                     break;
 

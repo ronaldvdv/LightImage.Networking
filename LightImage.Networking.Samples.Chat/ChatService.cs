@@ -25,7 +25,11 @@ namespace LightImage.Networking.Samples.Chat
 
         public void Send(string message)
         {
-            Actor.SendMoreFrame(ChatShim.C_CMD_SEND).SendFrame(message);
+            Actor.Send(socket =>
+            {
+                socket.SendMoreFrame(ChatShim.C_CMD_SEND);
+                socket.SendFrame(message);
+            });
         }
 
         protected override ChatShim CreateShim()

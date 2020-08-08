@@ -1,7 +1,5 @@
 ﻿using LightImage.Networking.Services;
 using NetMQ;
-using System;
-using System.Collections.Generic;
 
 namespace LightImage.Networking.FileSharing
 {
@@ -34,42 +32,50 @@ namespace LightImage.Networking.FileSharing
             path = message[offset + 2].ConvertToString();
         }
 
-        public static void SendAdd(IOutgoingSocket socket, FileDescriptor descriptor, string path)
+        public static void SendAdd(this IOutgoingSocket socket, FileDescriptor descriptor, string path)
         {
-            var message = NetMQTools.Message(
-                new NetMQFrame(C_CMD_ADD),
-                new NetMQFrame(descriptor.ToByteArray()),
-                new NetMQFrame(path)
-            );
-            socket.SendMultipartMessage(message);
+            socket.SendMoreFrame(C_CMD_ADD);
+            socket.SendMoreFrame(descriptor.ToByteArray());
+            socket.SendFrame(path);
         }
 
-        public static void SendCancel(IOutgoingSocket socket, FileDescriptor descriptor)
+        public static void SendAdd(IOutgoingSender sender, FileDescriptor descriptor, string path)
         {
-            var message = NetMQTools.Message(
-                new NetMQFrame(C_CMD_CANCEL),
-                new NetMQFrame(descriptor.ToByteArray())
-            );
-            socket.SendMultipartMessage(message);
+            sender.Send(socket => socket.SendAdd(descriptor, path));
         }
 
-        public static void SendRemove(IOutgoingSocket socket, FileDescriptor descriptor)
+        public static void SendCancel(IOutgoingSender sender, FileDescriptor descriptor)
         {
-            var message = NetMQTools.Message(
-                new NetMQFrame(C_CMD_REMOVE),
-                new NetMQFrame(descriptor.ToByteArray())
-            );
-            socket.SendMultipartMessage(message);
+            sender.Send(socket => socket.SendCancel(descriptor));
         }
 
-        public static void SendRequest(IOutgoingSocket socket, FileDescriptor descriptor, string path)
+        public static void SendCancel(this IOutgoingSocket socket, FileDescriptor descriptor)
         {
-            var message = NetMQTools.Message(
-                new NetMQFrame(C_CMD_REQUEST),
-                new NetMQFrame(descriptor.ToByteArray()),
-                new NetMQFrame(path)
-            );
-            socket.SendMultipartMessage(message);
+            socket.SendMoreFrame(C_CMD_CANCEL);
+            socket.SendFrame(descriptor.ToByteArray());
+        }
+
+        public static void SendRemove(IOutgoingSender sender, FileDescriptor descriptor)
+        {
+            sender.Send(socket => socket.SendRemove(descriptor));
+        }
+
+        public static void SendRemove(this IOutgoingSocket socket, FileDescriptor descriptor)
+        {
+            socket.SendMoreFrame(C_CMD_REMOVE);
+            socket.SendFrame(descriptor.ToByteArray());
+        }
+
+        public static void SendRequest(IOutgoingSender sender, FileDescriptor descriptor, string path)
+        {
+            sender.Send(socket => socket.SendRequest(descriptor, path));
+        }
+
+        public static void SendRequest(this IOutgoingSocket socket, FileDescriptor descriptor, string path)
+        {
+            socket.SendMoreFrame(C_CMD_REQUEST);
+            socket.SendMoreFrame(descriptor.ToByteArray());
+            socket.SendFrame(path);
         }
     }
 }

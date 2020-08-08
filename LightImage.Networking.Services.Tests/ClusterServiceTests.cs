@@ -157,7 +157,11 @@ namespace LightImage.Networking.Services.Tests
                 if (cmd == C_COMMAND)
                 {
                     int value = msg[1].ConvertToInt32();
-                    Shim.SendMoreFrame(C_COMMAND).SendFrame(value);
+                    Shim.Send(socket =>
+                    {
+                        socket.SendMoreFrame(C_COMMAND);
+                        socket.SendFrame(value);
+                    });
                     return;
                 }
                 base.HandleRouterMessage(cmd, msg, identity);

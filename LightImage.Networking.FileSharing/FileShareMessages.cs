@@ -53,12 +53,15 @@ namespace LightImage.Networking.FileSharing
             socket.SendFrame(data, chunk.Size);
         }
 
-        public static void SendFinished(IOutgoingSocket socket, DownloadOutcome outcome, FileDescriptor descriptor, string path)
+        public static void SendFinished(IOutgoingSender sender, DownloadOutcome outcome, FileDescriptor descriptor, string path)
         {
-            socket.SendMoreFrame(C_EVT_FINISHED);
-            socket.SendMoreFrame(BitConverter.GetBytes((int)outcome));
-            socket.SendMoreFrame(descriptor.ToByteArray());
-            socket.SendFrame(path ?? "");
+            sender.Send(socket =>
+            {
+                socket.SendMoreFrame(C_EVT_FINISHED);
+                socket.SendMoreFrame(BitConverter.GetBytes((int)outcome));
+                socket.SendMoreFrame(descriptor.ToByteArray());
+                socket.SendFrame(path ?? "");
+            });
         }
 
         public static void SendGet(IOutgoingSocket socket, FileDescriptor descriptor, ChunkRange chunk)
@@ -75,11 +78,14 @@ namespace LightImage.Networking.FileSharing
             socket.SendFrame(chunk.ToByteArray());
         }
 
-        public static void SendProgress(IOutgoingSocket socket, FileDescriptor descriptor, long bytesReceived)
+        public static void SendProgress(IOutgoingSender sender, FileDescriptor descriptor, long bytesReceived)
         {
-            socket.SendMoreFrame(C_EVT_PROGRESS);
-            socket.SendMoreFrame(descriptor.ToByteArray());
-            socket.SendFrame(BitConverter.GetBytes(bytesReceived));
+            sender.Send(socket =>
+            {
+                socket.SendMoreFrame(C_EVT_PROGRESS);
+                socket.SendMoreFrame(descriptor.ToByteArray());
+                socket.SendFrame(BitConverter.GetBytes(bytesReceived));
+            });
         }
     }
 }

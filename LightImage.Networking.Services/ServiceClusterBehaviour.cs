@@ -8,7 +8,7 @@
         /// <summary>
         /// Connects to every peer in the network.
         /// </summary>
-        Always = 1,
+        Global = 1,
 
         /// <summary>
         /// Only connects to peers in the same session.

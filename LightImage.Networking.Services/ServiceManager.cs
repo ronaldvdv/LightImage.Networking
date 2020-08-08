@@ -99,14 +99,14 @@ namespace LightImage.Networking.Services
         }
 
         /// <inheritdoc/>
-        public void Reset()
+        public void Reset(bool includeGlobalServices = false)
         {
             if (!IsRunning)
             {
                 throw new InvalidOperationException("Cannot reset services when they are not running.");
             }
 
-            foreach (var service in _services.Values)
+            foreach (var service in _services.Values.Where(service => includeGlobalServices || service.ClusterBehaviour != ServiceClusterBehaviour.Global))
             {
                 _logger?.LogTrace(ServiceEvents.Reset, "Resetting service {service}", service);
                 service.Reset();

@@ -92,6 +92,16 @@ namespace LightImage.Networking.Discovery
         }
 
         /// <summary>
+        /// Instruct the shim to add an existing peer to the session.
+        /// </summary>
+        /// <param name="sender">Shim socket sender.</param>
+        /// <param name="peer">Unique identifier of the peer to be added.</param>
+        public static void SendAddCommand(this IOutgoingSender sender, Guid peer)
+        {
+            sender.Send(socket => socket.SendAddCommand(peer));
+        }
+
+        /// <summary>
         /// Instruct the shim to mark a peer as alive recently.
         /// </summary>
         /// <param name="socket">Shim socket.</param>
@@ -100,6 +110,16 @@ namespace LightImage.Networking.Discovery
         {
             var peerBytes = _guidFrames.Get(peer, p => p.ToByteArray());
             socket.SendMoreFrame(C_CMD_HEARTBEAT).SendFrame(peerBytes);
+        }
+
+        /// <summary>
+        /// Instruct the shim to mark a peer as alive recently.
+        /// </summary>
+        /// <param name="sender">Shim socket sender.</param>
+        /// <param name="peer">Unique identifier of the peer for which a heartbeat was received.</param>
+        public static void SendHeartbeatCommand(this IOutgoingSender sender, Guid peer)
+        {
+            sender.Send(socket => socket.SendHeartbeatCommand(peer));
         }
 
         /// <summary>
@@ -131,27 +151,36 @@ namespace LightImage.Networking.Discovery
         /// <summary>
         /// Inform the service that the shim has finished initialization.
         /// </summary>
-        /// <param name="socket">Shim socket.</param>
+        /// <param name="sender">Shim socket.</param>
         /// <param name="host">Host to which the daemon is bound.</param>
         /// <param name="port">Port number where the service is listening for peers.</param>
-        public static void SendInitEvent(this IOutgoingSocket socket, string host, int port)
+        public static void SendInitEvent(this IOutgoingSender sender, string host, int port)
         {
-            socket.SendMoreFrame(C_EVT_INIT).SendMoreFrame(host).SendFrame(port);
+            sender.Send(socket =>
+            {
+                socket.SendMoreFrame(C_EVT_INIT);
+                socket.SendMoreFrame(host);
+                socket.SendFrame(port);
+            });
         }
 
         /// <summary>
         /// Inform the service that the shim wants to join a session.
         /// </summary>
-        /// <param name="socket">Shim socket.</param>
+        /// <param name="sender">Shim socket sender.</param>
         /// <param name="session">Desired new session number.</param>
         /// <remarks>
         /// This event is typically raised because of FollowLocally behaviour. The service is in charge of choosing the
         /// session and needs to know the latest session at all times. Therefore, the shim raises this event which leads
         /// the service to send the SESSION command back to the shim and update its internal state simultaneously.
         /// </remarks>
-        public static void SendJoinEvent(this IOutgoingSocket socket, int session)
+        public static void SendJoinEvent(this IOutgoingSender sender, int session)
         {
-            socket.SendMoreFrame(C_EVT_JOIN).SendFrame(session);
+            sender.Send(socket =>
+            {
+                socket.SendMoreFrame(C_EVT_JOIN);
+                socket.SendFrame(session);
+            });
         }
 
         /// <summary>
@@ -166,11 +195,15 @@ namespace LightImage.Networking.Discovery
         /// <summary>
         /// Informs the service that the status of a peer has changed.
         /// </summary>
-        /// <param name="socket">Shim socket.</param>
+        /// <param name="sender">Shim socket sender.</param>
         /// <param name="data">Data describing the peer status.</param>
-        public static void SendPeerStatusEvent(this IOutgoingSocket socket, PeerStatusData data)
+        public static void SendPeerStatusEvent(this IOutgoingSender sender, PeerStatusData data)
         {
-            socket.SendMoreFrame(C_EVT_PEER).SendFrame(data.ToByteArray());
+            sender.Send(socket =>
+            {
+                socket.SendMoreFrame(C_EVT_PEER);
+                socket.SendFrame(data.ToByteArray());
+            });
         }
 
         /// <summary>
@@ -194,17 +227,20 @@ namespace LightImage.Networking.Discovery
         /// <summary>
         /// Inform the service that a peer has sent information about available services.
         /// </summary>
-        /// <param name="socket">Shim socket.</param>
+        /// <param name="sender">Shim socket sender.</param>
         /// <param name="peer">Unique identifier of the peer.</param>
         /// <param name="services">Encoded service descriptions.</param>
-        public static void SendServicesEvent(this IOutgoingSocket socket, Guid peer, NetMQFrame[] services)
+        public static void SendServicesEvent(this IOutgoingSender sender, Guid peer, NetMQFrame[] services)
         {
-            var peerBytes = _guidFrames.Get(peer, p => p.ToByteArray());
-            socket.SendMoreFrame(C_EVT_SERVICES).SendMoreFrame(peerBytes);
-            for (int i = 0; i < services.Length; i++)
+            sender.Send(socket =>
             {
-                socket.SendFrame(services[i].ToByteArray(), i < services.Length - 1);
-            }
+                var peerBytes = _guidFrames.Get(peer, p => p.ToByteArray());
+                socket.SendMoreFrame(C_EVT_SERVICES).SendMoreFrame(peerBytes);
+                for (int i = 0; i < services.Length; i++)
+                {
+                    socket.SendFrame(services[i].ToByteArray(), i < services.Length - 1);
+                }
+            });
         }
 
         /// <summary>
@@ -215,6 +251,16 @@ namespace LightImage.Networking.Discovery
         public static void SendSessionCommand(this IOutgoingSocket socket, int session)
         {
             socket.SendMoreFrame(C_CMD_SESSION).SendFrame(session);
+        }
+
+        /// <summary>
+        /// Instruct the shim to change its session and update its beacon.
+        /// </summary>
+        /// <param name="sender">Shim socket sender.</param>
+        /// <param name="session">New session number.</param>
+        public static void SendSessionCommand(this IOutgoingSender sender, int session)
+        {
+            sender.Send(socket => socket.SendSessionCommand(session));
         }
 
         /// <summary>

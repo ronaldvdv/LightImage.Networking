@@ -12,9 +12,15 @@ namespace LightImage.Networking.Discovery
     /// <summary>
     /// Shim handler for the actor running the discovery process.
     /// </summary>
-    internal partial class DiscoveryShim : IShimHandler
+    public partial class DiscoveryShim : IShimHandler
     {
         private readonly ILogger<DiscoveryShim> _logger;
+
+        /// <summary>
+        /// Descriptive name for this node (typically the software component).
+        /// </summary>
+        private readonly string _name;
+
         private readonly DiscoveryOptions _options;
 
         /// <summary>
@@ -26,6 +32,11 @@ namespace LightImage.Networking.Discovery
         /// Descriptions of services.
         /// </summary>
         private readonly IServiceDescription[] _services;
+
+        /// <summary>
+        /// Type of this node.
+        /// </summary>
+        private readonly string _type;
 
         /// <summary>
         /// UDP beacon publishing our router port and unique ID.
@@ -43,11 +54,6 @@ namespace LightImage.Networking.Discovery
         private Guid _id;
 
         /// <summary>
-        /// Descriptive name for this node (typically the software component).
-        /// </summary>
-        private string _name;
-
-        /// <summary>
         /// Poller orchestrating incoming messages.
         /// </summary>
         private NetMQPoller _poller;
@@ -62,17 +68,14 @@ namespace LightImage.Networking.Discovery
         /// </summary>
         private int _routerPort;
 
+        private MessageQueueSender _sender;
+
         /// <summary>
         /// Identifier for our current session.
         /// </summary>
         private int _session;
 
         private PairSocket _shim;
-
-        /// <summary>
-        /// Type of this node.
-        /// </summary>
-        private string _type;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscoveryShim"/> class.
@@ -121,17 +124,19 @@ namespace LightImage.Networking.Discovery
             timer.Elapsed += HandleTimerElapsed;
 
             shim.ReceiveReady += HandleShimReceiveReady;
-
             shim.SignalOK();
 
-            _poller = new NetMQPoller { _router, _beacon, _shim, timer };
+            _sender = new MessageQueueSender(_shim);
 
-            _shim.SendInitEvent(Host, _routerPort);
+            _poller = new NetMQPoller { _router, _beacon, _shim, _sender, timer };
+
+            _sender.SendInitEvent(Host, _routerPort);
 
             _poller.Run();
 
             DisconnectPeers();
             _poller.Dispose();
+            _sender.Dispose();
             _beacon.Dispose();
             _router.Dispose();
         }
@@ -164,14 +169,14 @@ namespace LightImage.Networking.Discovery
                 return;
             }
 
-            _shim.SendJoinEvent(peer.Session);
+            _sender.SendJoinEvent(peer.Session);
         }
 
         private void Disconnect(Peer peer)
         {
             _peers.Remove(peer.Id);
             peer.Dispose();
-            _shim.SendPeerStatusEvent(new PeerStatusData(peer.Id, null, 0, null, null, DiscoveryNode.C_NO_SESSION, PeerStatus.Lost));
+            _sender.SendPeerStatusEvent(new PeerStatusData(peer.Id, null, 0, null, null, DiscoveryNode.C_NO_SESSION, PeerStatus.Lost));
         }
 
         private void DisconnectPeers()
@@ -184,7 +189,7 @@ namespace LightImage.Networking.Discovery
 
         private Peer FindPeer(NetMQFrame identity)
         {
-            byte[] buffer = new byte[16];
+            var buffer = new byte[16];
             Array.Copy(identity.Buffer, 1, buffer, 0, 16);
             var id = new Guid(buffer);
             return FindPeer(id);
@@ -252,11 +257,11 @@ namespace LightImage.Networking.Discovery
                     var name = msg[3].ConvertToString();
                     var host = msg[4].ConvertToString();
                     var type = msg[5].ConvertToString();
-                    bool forceHandshake = BitConverter.ToInt32(msg[6].Buffer, 0) == 1;
+                    var forceHandshake = BitConverter.ToInt32(msg[6].Buffer, 0) == 1;
                     peer = ProcessBeacon(beacon, host, name, type, forceHandshake);
 
                     var services = msg.Skip(7).ToArray();
-                    _shim.SendServicesEvent(peer.Id, services);
+                    _sender.SendServicesEvent(peer.Id, services);
                     break;
 
                 // Join a session
@@ -269,7 +274,7 @@ namespace LightImage.Networking.Discovery
                     var session = peer.Session;
                     if (session != DiscoveryNode.C_NO_SESSION)
                     {
-                        _shim.SendJoinEvent(session);
+                        _sender.SendJoinEvent(session);
                     }
 
                     break;
@@ -323,7 +328,7 @@ namespace LightImage.Networking.Discovery
                 else if (peer.LastSeen < now - _options.EvasiveThreshold && peer.Status == PeerStatus.Alive)
                 {
                     peer.SetEvasive();
-                    _shim.SendPeerStatusEvent(new PeerStatusData(peer.Id, peer.Host, peer.Port, peer.Name, peer.Type, peer.Session, PeerStatus.Evasive));
+                    _sender.SendPeerStatusEvent(new PeerStatusData(peer.Id, peer.Host, peer.Port, peer.Name, peer.Type, peer.Session, PeerStatus.Evasive));
                 }
             }
         }
@@ -333,11 +338,11 @@ namespace LightImage.Networking.Discovery
             var peer = FindPeer(id);
             if (peer != null)
             {
-                bool evasive = peer.Status == PeerStatus.Evasive;
+                var evasive = peer.Status == PeerStatus.Evasive;
                 peer.MarkAlive();
                 if (evasive)
                 {
-                    _shim.SendPeerStatusEvent(new PeerStatusData(peer.Id, peer.Host, peer.Port, peer.Name, peer.Type, peer.Session, PeerStatus.Alive));
+                    _sender.SendPeerStatusEvent(new PeerStatusData(peer.Id, peer.Host, peer.Port, peer.Name, peer.Type, peer.Session, PeerStatus.Alive));
                 }
             }
         }
@@ -345,7 +350,7 @@ namespace LightImage.Networking.Discovery
         private Peer ProcessBeacon(BeaconData data, string host, string name = null, string type = null, bool forceHandshake = false)
         {
             var peer = FindPeer(data.Id);
-            bool sendEvent = false;
+            var sendEvent = false;
             if (peer != null)
             {
                 if (data.Port > 0)
@@ -367,7 +372,7 @@ namespace LightImage.Networking.Discovery
 
             if (sendEvent)
             {
-                _shim.SendPeerStatusEvent(new PeerStatusData(data.Id, host, data.Port, peer.Name, peer.Type, data.Session, PeerStatus.Alive));
+                _sender.SendPeerStatusEvent(new PeerStatusData(data.Id, host, data.Port, peer.Name, peer.Type, data.Session, PeerStatus.Alive));
             }
 
             return peer;

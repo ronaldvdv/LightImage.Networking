@@ -29,7 +29,11 @@ namespace LightImage.Networking.Samples.Chat
             {
                 case C_MSG_RECEIVE:
                     var message = msg[2].ConvertToString();
-                    Shim.SendMoreFrame(C_EVT_RECEIVED).SendFrame(message);
+                    Shim.Send(socket =>
+                    {
+                        socket.SendMoreFrame(C_EVT_RECEIVED);
+                        socket.SendFrame(message);
+                    });
                     break;
 
                 default:

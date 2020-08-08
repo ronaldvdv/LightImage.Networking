@@ -49,7 +49,8 @@ namespace LightImage.Networking.Services
         /// <summary>
         /// Reset the state of all services, disconnecting all their peers.
         /// </summary>
-        void Reset();
+        /// <param name="includeGlobalServices">Value indicating whether services with <see cref="IServiceDescription.ClusterBehaviour"/> <see cref="ServiceClusterBehaviour.Global"/> should also reset.</param>
+        void Reset(bool includeGlobalServices = false);
 
         /// <summary>
         /// Start all services.

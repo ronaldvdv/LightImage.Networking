@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NetMQ;
@@ -19,7 +20,10 @@ namespace LightImage.Networking.Services
         private readonly ILogger<ClusterService<TShim, TShimPeer>> _logger;
         private readonly Dictionary<Guid, ServicePeer> _peers = new Dictionary<Guid, ServicePeer>();
         private readonly TaskFactory _taskFactory;
+
+        private NetMQActor _actor;
         private NetMQPoller _poller;
+        private MessageQueueSender _sender;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClusterService{TShim, TShimPeer}"/> class.
@@ -56,9 +60,9 @@ namespace LightImage.Networking.Services
         public bool IsRunning { get; private set; } = false;
 
         /// <summary>
-        /// Gets the actor which runs the see <see cref="ClusterShim{TPeer}"/>.
+        /// Gets a way to send messages to the actor which runs the see <see cref="ClusterShim{TPeer}"/>.
         /// </summary>
-        protected NetMQActor Actor { get; private set; }
+        protected IOutgoingSender Actor => _sender;
 
         /// <inheritdoc/>
         public override void Add(Guid id, string host, string role, int[] ports)
@@ -119,13 +123,14 @@ namespace LightImage.Networking.Services
             }
 
             var shim = CreateShim();
-            Actor = NetMQActor.Create(shim);
-            Actor.ReceiveReady += HandleActor_ReceiveReady;
+            _actor = NetMQActor.Create(shim);
+            _actor.ReceiveReady += HandleActor_ReceiveReady;
+            _sender = new MessageQueueSender(_actor);
 
-            var port = BitConverter.ToInt32(Actor.ReceiveFrameBytes(), 0);
+            var port = BitConverter.ToInt32(_actor.ReceiveFrameBytes(), 0);
             SetPorts(port);
 
-            _poller = new NetMQPoller { Actor };
+            _poller = new NetMQPoller { _actor, _sender };
             Setup(_poller);
             _poller.RunAsync();
 
@@ -146,7 +151,8 @@ namespace LightImage.Networking.Services
 
             _poller.Stop();
             _poller.Dispose();
-            Actor.Dispose();
+            _sender.Dispose();
+            _actor.Dispose();
         }
 
         /// <summary>

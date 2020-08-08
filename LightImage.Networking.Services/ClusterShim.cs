@@ -20,6 +20,12 @@ namespace LightImage.Networking.Services
         private Dictionary<Guid, TPeer> _peers = new Dictionary<Guid, TPeer>();
         private NetMQPoller _poller;
         private int _routerPort;
+        private MessageQueueSender _sender;
+
+        /// <summary>
+        /// Gets the socket that can be used to communicate with the owning service.
+        /// </summary>
+        private PairSocket _shim;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClusterShim{TPeer}"/> class.
@@ -43,6 +49,11 @@ namespace LightImage.Networking.Services
         public string RouterEndpoint => $"tcp://{Host}:{_routerPort}";
 
         /// <summary>
+        /// Gets a sender for communicating with the service.
+        /// </summary>
+        public IOutgoingSender Shim => _sender;
+
+        /// <summary>
         /// Gets the host (IP address) at which the shim can be reached.
         /// </summary>
         protected string Host { get; }
@@ -57,11 +68,6 @@ namespace LightImage.Networking.Services
         /// </summary>
         protected IEnumerable<TPeer> Peers => _peers.Values;
 
-        /// <summary>
-        /// Gets the socket that can be used to communicate with the owning service.
-        /// </summary>
-        protected PairSocket Shim { get; private set; }
-
         /// <inheritdoc/>
         public void Run(PairSocket shim)
         {
@@ -71,12 +77,13 @@ namespace LightImage.Networking.Services
             _routerPort = router.BindRandomPort($"tcp://{Host}");
             router.ReceiveReady += HandleRouterReceiveReady;
             shim.ReceiveReady += HandleShimReceiveReady;
-            Shim = shim;
+            _shim = shim;
+            _sender = new MessageQueueSender(_shim);
 
             shim.SignalOK();
             shim.SendFrame(BitConverter.GetBytes(_routerPort));
 
-            _poller = new NetMQPoller { router, shim };
+            _poller = new NetMQPoller { router, shim, _sender };
             Setup(_poller);
             _poller.Run();
             _logger.LogTrace(ClusterEvents.Stopping, "Shim is stopping");
@@ -86,6 +93,7 @@ namespace LightImage.Networking.Services
             _logger.LogTrace(ClusterEvents.Stopping, "Shim has disconnected from all peers");
 
             router.Dispose();
+            _sender.Dispose();
             _poller.Dispose();
 
             TearDown();
@@ -258,18 +266,24 @@ namespace LightImage.Networking.Services
 
         private void HandleRouterReceiveReady(object sender, NetMQSocketEventArgs e)
         {
-            var msg = e.Socket.ReceiveMultipartMessage();
-            var identity = msg[0].ToIdentityGuid();
-            var cmd = msg[1].ConvertToString();
-            ClusterMessages.SendHeartbeat(Shim, identity);
-            HandleRouterMessage(cmd, msg, identity);
+            var msg = new NetMQMessage();
+            while (e.Socket.TryReceiveMultipartMessage(ref msg))
+            {
+                var identity = msg[0].ToIdentityGuid();
+                var cmd = msg[1].ConvertToString();
+                ClusterMessages.SendHeartbeat(Shim, identity);
+                HandleRouterMessage(cmd, msg, identity);
+            }
         }
 
         private void HandleShimReceiveReady(object sender, NetMQSocketEventArgs e)
         {
-            var msg = e.Socket.ReceiveMultipartMessage();
-            var cmd = msg[0].ConvertToString();
-            HandleShimMessage(cmd, msg);
+            var msg = new NetMQMessage();
+            while (e.Socket.TryReceiveMultipartMessage(ref msg))
+            {
+                var cmd = msg[0].ConvertToString();
+                HandleShimMessage(cmd, msg);
+            }
         }
     }
 }
