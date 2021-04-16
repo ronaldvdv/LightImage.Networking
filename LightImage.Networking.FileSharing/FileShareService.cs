@@ -13,7 +13,7 @@ namespace LightImage.Networking.FileSharing
         private readonly FileShareOptions _options;
         private readonly FileShareShim.Factory _shimFactory;
 
-        public FileShareService(NetworkOptions network, FileShareOptions options, FileShareShim.Factory shimFactory, ILogger<FileShareService> logger, string name = C_SERVICE_NAME)
+        public FileShareService(NetworkInfo network, FileShareOptions options, FileShareShim.Factory shimFactory, ILogger<FileShareService> logger, string name = C_SERVICE_NAME)
             : this(network.Id, network.Host, options, shimFactory, logger, name) { }
 
         public FileShareService(Guid id, string host, FileShareOptions options, FileShareShim.Factory shimFactory, ILogger<FileShareService> logger, string name = C_SERVICE_NAME) : base(id, host, name, C_SERVICE_ROLE, logger)

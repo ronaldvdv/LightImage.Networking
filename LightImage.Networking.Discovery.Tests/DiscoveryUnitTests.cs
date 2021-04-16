@@ -15,6 +15,7 @@ namespace LightImage.Networking.Discovery.Tests
     [TestClass]
     public partial class DiscoveryUnitTests
     {
+        const string C_HOST = "127.0.0.1";
         private readonly Mock<IServiceManager> _services = new Mock<IServiceManager>();
         private readonly TimeSpan C_TIMEOUT_SMALL = TimeSpan.FromSeconds(0.2);
         private NetMQBeacon _beacon;
@@ -65,7 +66,7 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestBeaconSent()
         {
-            _node = new DiscoveryNode(_id, "Test", "test", _logger, _shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
+            _node = new DiscoveryNode(_id, "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
             _poller.RunAsync();
             Assert.IsTrue(_beacon.TryReceive(C_TIMEOUT_SMALL, out var msg));
             var data = BeaconData.Parse(msg.Bytes);
@@ -81,7 +82,7 @@ namespace LightImage.Networking.Discovery.Tests
         [DataRow(1, 2, 1)]
         public void TestBeaconUpdatedWhenJoinReceived(int mySession, int initialSession, int expectedSession)
         {
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
             if (initialSession != DiscoveryNode.C_NO_SESSION)
                 _node.Join(initialSession);
             _beacon.Publish(new BeaconData(_id, _port, mySession, 0).ToByteArray());
@@ -112,7 +113,7 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestBeaconUpdatedWhenSessionChanged()
         {
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
             var session = 1;
             _node.Join(session);
             _poller.RunAsync();
@@ -128,7 +129,7 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestBeaconUpdatedWhenStopping()
         {
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
             _poller.RunAsync();
 
             Thread.Sleep(C_TIMEOUT_SMALL);
@@ -147,7 +148,7 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestConnectsWhenBeaconReceived()
         {
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
 
             _poller.RunAsync();
             NetMQMessage msg = null;
@@ -161,7 +162,7 @@ namespace LightImage.Networking.Discovery.Tests
             var fakeService = new FakeService("TestService", "MyRole", new int[] { 3, 4 });
             var services = new Mock<IServiceManager>();
             services.Setup(sm => sm.GetDescriptors()).Returns(new[] { fakeService });
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
             _poller.RunAsync();
             NetMQMessage msg = null;
             Assert.IsTrue(_router.TryReceiveMultipartMessage(C_TIMEOUT_SMALL * 3, ref msg));
@@ -175,7 +176,7 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestJoinSentWhenAddCalled()
         {
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
             _poller.RunAsync();
             _node.Join(1);
             Thread.Sleep(C_TIMEOUT_SMALL);
@@ -195,7 +196,7 @@ namespace LightImage.Networking.Discovery.Tests
             _services.Setup(sm => sm.GetDescriptors()).Returns(new[] { fakeService });
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 4, EvasiveThreshold = C_TIMEOUT_SMALL, LostThreshold = C_TIMEOUT_SMALL * 10 };
             var session = 1;
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, options);
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, options);
             _node.Join(session);
             _poller.RunAsync();
 
@@ -231,7 +232,7 @@ namespace LightImage.Networking.Discovery.Tests
         public void TestNodeDisconnectsWhenBeaconStopsGracefully()
         {
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 2, EvasiveThreshold = C_TIMEOUT_SMALL };
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, options);
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, options);
             _poller.RunAsync();
             NetMQMessage msg = null;
 
@@ -254,7 +255,7 @@ namespace LightImage.Networking.Discovery.Tests
         public void TestNodeSendsPingWhenBeaconStops()
         {
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 2, EvasiveThreshold = C_TIMEOUT_SMALL };
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, options);
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, options);
             _poller.RunAsync();
             NetMQMessage msg = null;
 
@@ -275,7 +276,7 @@ namespace LightImage.Networking.Discovery.Tests
             var fakeService = new FakeService("TestService", "MyRole", new int[] { 3, 4 });
             var services = new Mock<IServiceManager>();
             services.Setup(sm => sm.GetDescriptors()).Returns(new[] { fakeService });
-            _node = new DiscoveryNode(new Guid(), "Test", "test", _logger, _shimLogger, services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
+            _node = new DiscoveryNode(new Guid(), "Test", "test", C_HOST, _logger,_shimLogger, services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
             var session = 1;
             _node.Join(session);
             _poller.RunAsync();
@@ -307,7 +308,7 @@ namespace LightImage.Networking.Discovery.Tests
         public void TestHeartbeatMarksAlive()
         {
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 4, EvasiveThreshold = C_TIMEOUT_SMALL };
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, options);
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, options);
             _poller.RunAsync();
 
             PeerEventArgs args = null;
@@ -332,7 +333,7 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestPeerDiscoveredRaised()
         {
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
             var mre = new ManualResetEventSlim();
             PeerDiscoveredEventArgs args = null;
             _node.PeerDiscovered += (_, e) => { args = e; mre.Set(); };
@@ -346,7 +347,7 @@ namespace LightImage.Networking.Discovery.Tests
         public void TestPeerEvasiveRaised()
         {
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 4, EvasiveThreshold = C_TIMEOUT_SMALL };
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, options);
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, options);
             _poller.RunAsync();
 
             PeerEventArgs args = null;
@@ -367,7 +368,7 @@ namespace LightImage.Networking.Discovery.Tests
             var fakeService = new FakeService("TestService", "MyRole", new int[] { 3, 4 });
             _services.Setup(sm => sm.GetDescriptors()).Returns(new[] { fakeService });
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 4, EvasiveThreshold = C_TIMEOUT_SMALL, LostThreshold = C_TIMEOUT_SMALL * 3 };
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, options);
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, options);
             _poller.RunAsync();
 
             PeerEventArgs args = null;
@@ -388,7 +389,7 @@ namespace LightImage.Networking.Discovery.Tests
         public void TestPeerReturnedRaised()
         {
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 4, EvasiveThreshold = C_TIMEOUT_SMALL, LostThreshold = C_TIMEOUT_SMALL * 10 };
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, options);
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, options);
             _poller.RunAsync();
 
             PeerEventArgs args = null;
@@ -411,7 +412,7 @@ namespace LightImage.Networking.Discovery.Tests
         public void TestPeerSessionChangedRaised()
         {
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 4, EvasiveThreshold = C_TIMEOUT_SMALL, LostThreshold = C_TIMEOUT_SMALL * 10 };
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, options);
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, options);
             _poller.RunAsync();
 
             PeerSessionChangedEventArgs args = null;
@@ -430,7 +431,7 @@ namespace LightImage.Networking.Discovery.Tests
         public void TestSessionChangedRaised()
         {
             var options = new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2, TimerInterval = C_TIMEOUT_SMALL / 4, EvasiveThreshold = C_TIMEOUT_SMALL, LostThreshold = C_TIMEOUT_SMALL * 10 };
-            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", _logger, _shimLogger, _services.Object, options);
+            _node = new DiscoveryNode(Guid.NewGuid(), "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, options);
             _poller.RunAsync();
 
             SessionChangedEventArgs args = null;

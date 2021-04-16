@@ -16,7 +16,7 @@ namespace LightImage.Networking.FileSharing.Tests.Shared
         private NetMQPoller _poller;
         private SubscriberSocket _subscriber;
 
-        public ListSubscriberService(NetworkOptions options) : this(options.Host)
+        public ListSubscriberService(NetworkInfo options) : this(options.Host)
         {
         }
 

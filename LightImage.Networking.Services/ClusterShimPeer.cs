@@ -20,7 +20,7 @@ namespace LightImage.Networking.Services
         {
             Id = id;
             Endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
-            Host = NetworkOptions.GetIPAddress(endpoint);
+            Host = NetworkInfo.GetIPAddress(endpoint);
             Role = role ?? throw new ArgumentNullException(nameof(role));
             Me = me;
 

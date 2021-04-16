@@ -152,14 +152,12 @@ namespace LightImage.Networking.Discovery
         /// Inform the service that the shim has finished initialization.
         /// </summary>
         /// <param name="sender">Shim socket.</param>
-        /// <param name="host">Host to which the daemon is bound.</param>
         /// <param name="port">Port number where the service is listening for peers.</param>
-        public static void SendInitEvent(this IOutgoingSender sender, string host, int port)
+        public static void SendInitEvent(this IOutgoingSender sender, int port)
         {
             sender.Send(socket =>
             {
                 socket.SendMoreFrame(C_EVT_INIT);
-                socket.SendMoreFrame(host);
                 socket.SendFrame(port);
             });
         }

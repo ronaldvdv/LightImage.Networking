@@ -11,7 +11,7 @@ namespace LightImage.Networking.Samples.Chat
         public const string C_SERVICE_NAME = "Chat";
         private readonly ChatShim.Factory _shimFactory;
 
-        public ChatService(NetworkOptions network, ChatShim.Factory shimFactory, ILogger<ChatService> logger)
+        public ChatService(NetworkInfo network, ChatShim.Factory shimFactory, ILogger<ChatService> logger)
             : this(network.Id, network.Host, C_SERVICE_NAME, C_ROLE, logger)
         {
             _shimFactory = shimFactory;

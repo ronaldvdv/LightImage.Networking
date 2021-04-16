@@ -4,6 +4,7 @@ using NetMQ;
 
 namespace LightImage.Networking.Services
 {
+
     /// <summary>
     /// Autofac module for the services functionality.
     /// </summary>
@@ -29,6 +30,8 @@ namespace LightImage.Networking.Services
         {
             builder.RegisterType<ServiceManager>().As<IServiceManager>().SingleInstance();
             builder.Configure<NetworkOptions>(_config, NetworkOptions.C_CONFIG_SECTION);
+            builder.RegisterType<NetworkInfo>().AsSelf().SingleInstance();
+            builder.RegisterType<DefaultHostProvider>().As<IHostProvider>();
         }
     }
 }
