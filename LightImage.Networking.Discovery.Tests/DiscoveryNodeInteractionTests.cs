@@ -11,6 +11,8 @@ namespace LightImage.Networking.Discovery.Tests
     [TestClass]
     public class DiscoveryNodeInteractionTests
     {
+        const string C_HOST = "127.0.0.1";
+
         private readonly List<DiscoveryNode> _nodes = new List<DiscoveryNode>();
         private readonly TimeSpan C_SMALL_TIMEOUT = TimeSpan.FromSeconds(0.1);
         private ILogger<DiscoveryNode> _logger;
@@ -53,11 +55,11 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestAddPeerInServiceWhenItsJoiningSession()
         {
-            var node1 = new DiscoveryNode(Guid.NewGuid(), "Test1", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service1 }), _options);
+            var node1 = new DiscoveryNode(Guid.NewGuid(), "Test1", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service1 }), _options);
             var session = 1;
             node1.Join(session);
 
-            var node2 = new DiscoveryNode(Guid.NewGuid(), "Test2", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service2 }), _options);
+            var node2 = new DiscoveryNode(Guid.NewGuid(), "Test2", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service2 }), _options);
             node2.Join(session);
 
             AddNodes(node1, node2);
@@ -74,9 +76,9 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestAddPeerWhenImJoiningSession()
         {
-            var node1 = new DiscoveryNode(Guid.NewGuid(), "Test1", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service1 }), _options);
+            var node1 = new DiscoveryNode(Guid.NewGuid(), "Test1", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service1 }), _options);
             var session = 1;
-            var node2 = new DiscoveryNode(Guid.NewGuid(), "Test2", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service2 }), _options);
+            var node2 = new DiscoveryNode(Guid.NewGuid(), "Test2", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service2 }), _options);
             AddNodes(node1, node2);
 
             node2.Join(session);
@@ -94,8 +96,8 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestIgnoreIfNotInSession()
         {
-            var node1 = new DiscoveryNode(Guid.NewGuid(), "Test1", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service1 }), _options);
-            var node2 = new DiscoveryNode(Guid.NewGuid(), "Test2", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service2 }), _options);
+            var node1 = new DiscoveryNode(Guid.NewGuid(), "Test1", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service1 }), _options);
+            var node2 = new DiscoveryNode(Guid.NewGuid(), "Test2", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service2 }), _options);
             AddNodes(node1, node2);
             node2.Join(1);
 
@@ -107,9 +109,9 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestRemovePeerFromSessionWhenSomebodyLeavesSession()
         {
-            var node1 = new DiscoveryNode(Guid.NewGuid(), "Test1", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service1 }), _options);
+            var node1 = new DiscoveryNode(Guid.NewGuid(), "Test1", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service1 }), _options);
             var session = 1;
-            var node2 = new DiscoveryNode(Guid.NewGuid(), "Test2", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service2 }), _options);
+            var node2 = new DiscoveryNode(Guid.NewGuid(), "Test2", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service2 }), _options);
             AddNodes(node1, node2);
 
             node2.Join(session);
@@ -124,9 +126,9 @@ namespace LightImage.Networking.Discovery.Tests
         [TestMethod]
         public void TestSwitchSession()
         {
-            var node1 = new DiscoveryNode(Guid.NewGuid(), "Test1", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service1 }), _options);
-            var node2 = new DiscoveryNode(Guid.NewGuid(), "Test2", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service2 }), _options);
-            var node3 = new DiscoveryNode(Guid.NewGuid(), "Test3", "test", _logger, _shimLogger, new ServiceManager(new IService[] { _service3 }), _options);
+            var node1 = new DiscoveryNode(Guid.NewGuid(), "Test1", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service1 }), _options);
+            var node2 = new DiscoveryNode(Guid.NewGuid(), "Test2", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service2 }), _options);
+            var node3 = new DiscoveryNode(Guid.NewGuid(), "Test3", "test", C_HOST, _logger, _shimLogger, new ServiceManager(new IService[] { _service3 }), _options);
             AddNodes(node1, node2, node3);
 
             var session1 = 1;

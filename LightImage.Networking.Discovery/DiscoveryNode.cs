@@ -72,13 +72,13 @@ namespace LightImage.Networking.Discovery
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscoveryNode"/> class using dependency injection.
         /// </summary>
-        /// <param name="options">General network options to be used for the ID, component and name.</param>
+        /// <param name="network">General network options to be used for the ID, component and name.</param>
         /// <param name="services">Services to be exposed and managed by the node.</param>
         /// <param name="discoveryOptions">Options specific to the discovery process.</param>
         /// <param name="logger">Logger for this node.</param>
         /// <param name="shimLogger">Logger for the <see cref="DiscoveryShim"/>.</param>
-        public DiscoveryNode(NetworkOptions options, IServiceManager services, DiscoveryOptions discoveryOptions, ILogger<DiscoveryNode> logger, ILogger<DiscoveryShim> shimLogger)
-            : this(options.Id, options.Component, options.Type, logger, shimLogger, services, discoveryOptions)
+        public DiscoveryNode(NetworkInfo network, IServiceManager services, DiscoveryOptions discoveryOptions, ILogger<DiscoveryNode> logger, ILogger<DiscoveryShim> shimLogger)
+            : this(network.Id, network.Options.Component, network.Options.Type, network.Host, logger, shimLogger, services, discoveryOptions)
         {
         }
 
@@ -88,12 +88,13 @@ namespace LightImage.Networking.Discovery
         /// <param name="id">Unique identifier.</param>
         /// <param name="name">Descriptive name.</param>
         /// <param name="type">Type of node.</param>
+        /// <param name="host">Host where the node is running.</param>
         /// <param name="logger">Logger for this node.</param>
         /// <param name="shimLogger">Logger for the <see cref="DiscoveryShim"/>.</param>
         /// <param name="services">Services to be exposed and managed.</param>
         /// <param name="options">Additional configuration.</param>
-        public DiscoveryNode(Guid id, string name, string type, ILogger<DiscoveryNode> logger, ILogger<DiscoveryShim> shimLogger, IServiceManager services, DiscoveryOptions options = null)
-            : base(id, name, type, null, 0)
+        public DiscoveryNode(Guid id, string name, string type, string host, ILogger<DiscoveryNode> logger, ILogger<DiscoveryShim> shimLogger, IServiceManager services, DiscoveryOptions options = null)
+            : base(id, name, type, host, 0)
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -102,7 +103,7 @@ namespace LightImage.Networking.Discovery
             _services.PeerHeartbeat += HandlePeerHeartbeat;
             _services.Start();
 
-            _actor = NetMQActor.Create(new DiscoveryShim(id, name, type, services.GetDescriptors(), shimLogger, options));
+            _actor = NetMQActor.Create(new DiscoveryShim(id, name, type, host, services.GetDescriptors(), shimLogger, options));
             _actor.ReceiveReady += HandleActorReceiveReady;
 
             _sender = new MessageQueueSender(_actor);
@@ -223,8 +224,7 @@ namespace LightImage.Networking.Discovery
                     break;
 
                 case DiscoveryMessages.C_EVT_INIT:
-                    Host = msg[1].ConvertToString();
-                    Port = msg[2].ConvertToInt32();
+                    Port = msg[1].ConvertToInt32();
                     OnInitialized();
                     break;
 

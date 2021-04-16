@@ -83,14 +83,16 @@ namespace LightImage.Networking.Discovery
         /// <param name="id">Unique identifier of the node.</param>
         /// <param name="name">Descriptive name of the node.</param>
         /// <param name="type">Type of the node.</param>
+        /// <param name="host">Host where hte node is running.</param>
         /// <param name="services">Description of services to be published.</param>
         /// <param name="logger">Logger for the disovery shim.</param>
         /// <param name="options">Discovery configuration.</param>
-        public DiscoveryShim(Guid id, string name, string type, IServiceDescription[] services, ILogger<DiscoveryShim> logger, DiscoveryOptions options = null)
+        public DiscoveryShim(Guid id, string name, string type, string host, IServiceDescription[] services, ILogger<DiscoveryShim> logger, DiscoveryOptions options = null)
         {
             _id = id;
             _name = name;
             _type = type;
+            Host = host;
             _services = services ?? new IServiceDescription[] { };
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _options = options ?? DiscoveryOptions.Default;
@@ -99,7 +101,7 @@ namespace LightImage.Networking.Discovery
         /// <summary>
         /// Gets the host to which the beacon is bound.
         /// </summary>
-        public string Host => _beacon.BoundTo;
+        public string Host { get; }
 
         /// <inheritdoc/>
         public void Run(PairSocket shim)
@@ -130,7 +132,7 @@ namespace LightImage.Networking.Discovery
 
             _poller = new NetMQPoller { _router, _beacon, _shim, _sender, timer };
 
-            _sender.SendInitEvent(Host, _routerPort);
+            _sender.SendInitEvent(_routerPort);
 
             _poller.Run();
 

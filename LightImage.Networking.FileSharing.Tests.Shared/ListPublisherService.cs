@@ -12,7 +12,7 @@ namespace LightImage.Networking.FileSharing.Tests.Shared
         private int _port;
         private PublisherSocket _publisher;
 
-        public ListPublisherService(NetworkOptions options) : this(options.Host)
+        public ListPublisherService(NetworkInfo options) : this(options.Host)
         {
         }
 

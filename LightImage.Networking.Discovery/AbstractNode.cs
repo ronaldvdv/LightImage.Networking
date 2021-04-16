@@ -25,7 +25,7 @@ namespace LightImage.Networking.Discovery
         }
 
         /// <inheritdoc/>
-        public string Host { get; protected set; }
+        public string Host { get; internal set; }
 
         /// <inheritdoc/>
         public Guid Id { get; }
