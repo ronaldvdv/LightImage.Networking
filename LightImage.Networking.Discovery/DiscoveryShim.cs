@@ -227,13 +227,17 @@ namespace LightImage.Networking.Discovery
         private void HandleBeaconReceived(object sender, NetMQBeaconEventArgs e)
         {
             var msg = _beacon.Receive();
-            var data = BeaconData.Parse(msg.Bytes);
-            if (data.Id == _id)
+            if (!BeaconData.TryParse(msg.Bytes, out var beacon))
             {
                 return;
             }
 
-            ProcessBeacon(data, msg.PeerHost);
+            if (beacon.Id == _id)
+            {
+                return;
+            }
+
+            ProcessBeacon(beacon, msg.PeerHost);
         }
 
         private void HandleRouterReceiveReady(object sender, NetMQSocketEventArgs e)
@@ -255,7 +259,11 @@ namespace LightImage.Networking.Discovery
 
                 // Make sure we've registered this peer
                 case DiscoveryMessages.C_MSG_HELLO:
-                    var beacon = BeaconData.Parse(msg[2].Buffer);
+                    if (!BeaconData.TryParse(msg[2].Buffer, out var beacon))
+                    {
+                        throw new InvalidOperationException($"Invalid beacon received in HELLO message");
+                    }
+
                     var name = msg[3].ConvertToString();
                     var host = msg[4].ConvertToString();
                     var type = msg[5].ConvertToString();

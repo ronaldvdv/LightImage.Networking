@@ -69,7 +69,7 @@ namespace LightImage.Networking.Discovery.Tests
             _node = new DiscoveryNode(_id, "Test", "test", C_HOST, _logger,_shimLogger, _services.Object, new DiscoveryOptions { BeaconInterval = C_TIMEOUT_SMALL / 2 });
             _poller.RunAsync();
             Assert.IsTrue(_beacon.TryReceive(C_TIMEOUT_SMALL, out var msg));
-            var data = BeaconData.Parse(msg.Bytes);
+            Assert.IsTrue(BeaconData.TryParse(msg.Bytes, out  var data));
             Assert.AreEqual(_node.Id, data.Id);
             Assert.AreEqual(DiscoveryNode.C_NO_SESSION, data.Session);
         }
@@ -93,7 +93,7 @@ namespace LightImage.Networking.Discovery.Tests
             // Receive HELLO and connect
             NetMQMessage beaconMsg = null;
             Assert.IsTrue(_router.TryReceiveMultipartMessage(C_TIMEOUT_SMALL * 3, ref beaconMsg));
-            var beacon = BeaconData.Parse(beaconMsg[2].Buffer);
+            Assert.IsTrue(BeaconData.TryParse(beaconMsg[2].Buffer, out var beacon));
             var host = beaconMsg[4].ConvertToString();
 
             _dealer = new DealerSocket($"tcp://{host}:{beacon.Port}");
@@ -104,7 +104,7 @@ namespace LightImage.Networking.Discovery.Tests
             BeaconData data = null;
             while (_beacon.TryReceive(TimeSpan.Zero, out var msg))
             {
-                data = BeaconData.Parse(msg.Bytes);
+                Assert.IsTrue(BeaconData.TryParse(msg.Bytes, out data));
                 Debug.WriteLine($"Beacon received: {data.Session} from {data.Port}/{data.Id}");
             }
             Assert.AreEqual(expectedSession, data.Session);
@@ -121,7 +121,9 @@ namespace LightImage.Networking.Discovery.Tests
             Thread.Sleep(C_TIMEOUT_SMALL * 2);
             BeaconData data = null;
             while (_beacon.TryReceive(TimeSpan.Zero, out var msg))
-                data = BeaconData.Parse(msg.Bytes);
+            {
+                BeaconData.TryParse(msg.Bytes, out data);
+            }
             Assert.AreEqual(_node.Id, data.Id);
             Assert.AreEqual(session, data.Session);
         }
@@ -140,7 +142,9 @@ namespace LightImage.Networking.Discovery.Tests
 
             BeaconData data = null;
             while (_beacon.TryReceive(TimeSpan.Zero, out var msg))
-                data = BeaconData.Parse(msg.Bytes);
+            {
+                BeaconData.TryParse(msg.Bytes, out data);
+            }
             Assert.AreEqual(_node.Id, data.Id);
             Assert.AreEqual(0, data.Port);
         }
@@ -212,7 +216,7 @@ namespace LightImage.Networking.Discovery.Tests
             // Receive HELLO and connect
             NetMQMessage msg = null;
             Assert.IsTrue(_router.TryReceiveMultipartMessage(C_TIMEOUT_SMALL * 3, ref msg));
-            var beacon = BeaconData.Parse(msg[2].Buffer);
+            BeaconData.TryParse(msg[2].Buffer, out var beacon);
             var host = msg[4].ConvertToString();
 
             _dealer = new DealerSocket($"tcp://{host}:{beacon.Port}");
@@ -284,7 +288,7 @@ namespace LightImage.Networking.Discovery.Tests
             // Receive HELLO and connect
             NetMQMessage msg = null;
             Assert.IsTrue(_router.TryReceiveMultipartMessage(C_TIMEOUT_SMALL * 3, ref msg));
-            var beacon = BeaconData.Parse(msg[2].Buffer);
+            Assert.IsTrue(BeaconData.TryParse(msg[2].Buffer, out var beacon));
             var host = msg[4].ConvertToString();
 
             _dealer = new DealerSocket($"tcp://{host}:{beacon.Port}");

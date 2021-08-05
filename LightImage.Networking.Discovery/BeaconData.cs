@@ -51,28 +51,32 @@ namespace LightImage.Networking.Discovery
         /// Parses beacon data from a byte array.
         /// </summary>
         /// <param name="data">Data to be parsed.</param>
+        /// <param name="beacon">The resulting beacon data.</param>
         /// <returns>Parsed beacon data.</returns>
-        public static BeaconData Parse(byte[] data)
+        public static bool TryParse(byte[] data, out BeaconData beacon)
         {
+            beacon = default;
+
             using (var stream = new MemoryStream(data))
             {
                 using (var reader = new BinaryReader(stream))
                 {
                     if (!C_HEADER.SequenceEqual(reader.ReadChars(C_HEADER.Length)))
                     {
-                        throw new InvalidOperationException();
+                        return false;
                     }
 
                     if (reader.ReadByte() != C_VERSION)
                     {
-                        throw new InvalidOperationException();
+                        return false;
                     }
 
                     var id = new Guid(reader.ReadBytes(16));
                     int port = reader.ReadInt32();
                     var session = reader.ReadInt32();
                     int sequence = reader.ReadInt32();
-                    return new BeaconData(id, port, session, sequence);
+                    beacon = new BeaconData(id, port, session, sequence);
+                    return true;
                 }
             }
         }
