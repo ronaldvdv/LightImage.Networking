@@ -1,4 +1,4 @@
-﻿using LightImage.Util.Polly;
+﻿using LightImage.Networking.FileSharing.Policies;
 using System;
 
 namespace LightImage.Networking.FileSharing.Options
@@ -13,7 +13,7 @@ namespace LightImage.Networking.FileSharing.Options
         /// <summary>
         /// Expiry policy for unavailability data
         /// </summary>
-        RetryPolicy DownloadRetryPolicy { get; }
+        RetryPolicyConfig DownloadRetryPolicy { get; }
 
         /// <summary>
         /// Maximum number of parallel chunk requests

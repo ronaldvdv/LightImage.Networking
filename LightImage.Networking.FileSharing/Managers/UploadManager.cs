@@ -1,9 +1,6 @@
 ﻿using LightImage.Networking.FileSharing.IO;
 using LightImage.Networking.FileSharing.Options;
-using LightImage.Util.Polly;
 using Microsoft.Extensions.Logging;
-using Polly;
-using Polly.Retry;
 using System;
 using System.Buffers;
 using System.Collections.Generic;

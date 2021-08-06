@@ -9,10 +9,8 @@
     <RepositoryUrl>https://github.com/ronaldvdv/LightImage.Networking</RepositoryUrl>
     <PackageTags>netmq,services,actors,discovery,network,protocol,beacon</PackageTags>
     <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
-    <Version>1.24.0-alpha</Version>
-    <PackageIcon>logo.png</PackageIcon>
-    <AssemblyVersion>1.24.0.0</AssemblyVersion>
-    <FileVersion>1.24.0.0</FileVersion>
+    <Version>1.26</Version>
+    <PackageIcon>logo.png</PackageIcon>    
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -20,17 +18,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="6.2.0" />
-    <PackageReference Include="LightImage.Util" Version="1.5.0-alpha" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
+    <PackageReference Include="LightImage.Collections" Version="0.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
-    <PackageReference Include="NetMQ" Version="4.0.1.6" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.321">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Buffers" Version="4.5.1" />
   </ItemGroup>
 
   <ItemGroup>

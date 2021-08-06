@@ -1,5 +1,5 @@
 ﻿using System;
-using LightImage.Util.Polly;
+using LightImage.Networking.FileSharing.Policies;
 
 namespace LightImage.Networking.FileSharing
 {
@@ -8,7 +8,7 @@ namespace LightImage.Networking.FileSharing
     /// </summary>
     public class FileRequest
     {
-        public FileRequest(FileDescriptor descriptor, string path, int chunkSize, RetryPolicy availabilityExpiry)
+        public FileRequest(FileDescriptor descriptor, string path, int chunkSize, RetryPolicyConfig availabilityExpiry)
         {
             var fullChunks = descriptor.FileSize / chunkSize;
             var rest = descriptor.FileSize - (fullChunks * chunkSize);

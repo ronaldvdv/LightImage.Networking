@@ -63,7 +63,7 @@ namespace LightImage.Networking.Services
                 }
 
                 var bytes = BufferPool.Take(msg.Size);
-                msg.Data.AsSpan(0, msg.Size).CopyTo(bytes.AsSpan());
+                msg.Slice(0, msg.Size).CopyTo(bytes.AsSpan());
                 _frames.Add(new NetMQFrame(bytes, msg.Size));
                 _more = more;
                 return true;

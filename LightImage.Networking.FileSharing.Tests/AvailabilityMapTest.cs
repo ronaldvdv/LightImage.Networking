@@ -1,4 +1,4 @@
-﻿using LightImage.Util.Polly;
+﻿using LightImage.Networking.FileSharing.Policies;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
@@ -8,7 +8,7 @@ namespace LightImage.Networking.FileSharing.Tests
     [TestClass]
     public class AvailabilityMapTest
     {
-        private RetryPolicy _policy = RetryPolicy.Exponential(int.MaxValue, MS(20), 2, MS(80));
+        private readonly RetryPolicyConfig _policy = RetryPolicyConfig.Exponential(int.MaxValue, MS(20), 2, MS(80));
 
         [TestMethod]
         public void TestAvailabilityExpiresOnRemove()

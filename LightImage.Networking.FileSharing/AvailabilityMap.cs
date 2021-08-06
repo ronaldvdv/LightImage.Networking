@@ -1,4 +1,4 @@
-﻿using LightImage.Util.Polly;
+﻿using LightImage.Networking.FileSharing.Policies;
 using System;
 using System.Collections.Generic;
 
@@ -10,9 +10,9 @@ namespace LightImage.Networking.FileSharing
     public class AvailabilityMap
     {
         private readonly Dictionary<Guid, PeerAvailability> _data = new Dictionary<Guid, PeerAvailability>();
-        private readonly RetryPolicy _expiryPolicy;
+        private readonly RetryPolicyConfig _expiryPolicy;
 
-        public AvailabilityMap(RetryPolicy expiryPolicy)
+        public AvailabilityMap(RetryPolicyConfig expiryPolicy)
         {
             _expiryPolicy = expiryPolicy;
         }
@@ -59,10 +59,10 @@ namespace LightImage.Networking.FileSharing
         /// </summary>
         private class PeerAvailability
         {
-            private readonly RetryPolicy _policy;
+            private readonly RetryPolicyConfig _policy;
             private int _unavailabilies = 0;
 
-            public PeerAvailability(RetryPolicy policy)
+            public PeerAvailability(RetryPolicyConfig policy)
             {
                 _policy = policy;
             }

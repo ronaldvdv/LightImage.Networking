@@ -1,7 +1,7 @@
 using LightImage.Networking.FileSharing.IO;
 using LightImage.Networking.FileSharing.Managers;
 using LightImage.Networking.FileSharing.Options;
-using LightImage.Util.Polly;
+using LightImage.Networking.FileSharing.Policies;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -15,12 +15,13 @@ namespace LightImage.Networking.FileSharing.Tests
     [TestClass]
     public class UploadManagerTest
     {
-        private static readonly TimeSpan C_SMALL_TIMEOUT = TimeSpan.FromMilliseconds(50);
-        private Mock<IUploadContext> _context = new Mock<IUploadContext>();
+        private static readonly TimeSpan _smallTimeout = TimeSpan.FromMilliseconds(50);
+        private readonly Mock<IUploadContext> _context = new Mock<IUploadContext>();
+        private readonly Mock<IChunkReader> _reader = new Mock<IChunkReader>();
+        
         private ILogger<UploadManager> _logger;
         private ILoggerFactory _loggerFactory;
-        private Mock<IChunkReader> _reader = new Mock<IChunkReader>();
-
+        
         [TestCleanup]
         public void Cleanup()
         {
@@ -37,7 +38,7 @@ namespace LightImage.Networking.FileSharing.Tests
         [TestMethod]
         public void TestDoNotRetryEarly()
         {
-            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicy.Constant(1, C_SMALL_TIMEOUT) };
+            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicyConfig.Constant(1, _smallTimeout) };
             var manager = new UploadManager(options, _reader.Object, _logger);
             _reader.Setup(cr => cr.Read(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<int>(), It.IsAny<byte[]>())).Throws<IOException>();
 
@@ -57,7 +58,7 @@ namespace LightImage.Networking.FileSharing.Tests
             _context.VerifyNoOtherCalls();
 
             // Now wait before handling the timer
-            Task.Delay(C_SMALL_TIMEOUT).Wait();
+            Task.Delay(_smallTimeout).Wait();
             manager.HandleTimer(_context.Object);
             _reader.Verify(cr => cr.Read("test", 0, 5, It.IsAny<byte[]>()));
         }
@@ -67,7 +68,7 @@ namespace LightImage.Networking.FileSharing.Tests
         {
             const int C_MAX_ATTEMPTS = 3;
 
-            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicy.Immediate(C_MAX_ATTEMPTS) };
+            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicyConfig.Immediate(C_MAX_ATTEMPTS) };
             var manager = new UploadManager(options, _reader.Object, _logger);
             _reader.Setup(cr => cr.Read(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<int>(), It.IsAny<byte[]>())).Throws<IOException>();
 
@@ -93,7 +94,7 @@ namespace LightImage.Networking.FileSharing.Tests
         [TestMethod]
         public void TestRequestNormal()
         {
-            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicy.Immediate() };
+            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicyConfig.Immediate() };
             var manager = new UploadManager(options, _reader.Object, _logger);
             _reader.Setup(cr => cr.Read(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<int>(), It.IsAny<byte[]>())).Callback<string, long, int, byte[]>((path, offset, size, buffer) => { new byte[] { 1, 2, 3 }.CopyTo(buffer, 0); }).Returns(3);
 
@@ -110,7 +111,7 @@ namespace LightImage.Networking.FileSharing.Tests
         [TestMethod]
         public void TestRequestUnknown()
         {
-            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicy.Immediate() };
+            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicyConfig.Immediate() };
             var manager = new UploadManager(options, _reader.Object, _logger);
             var id = Guid.NewGuid();
             var descriptor = new FileDescriptor(1, FileDescriptor.C_EMPTY_HASH, 5);
@@ -129,7 +130,7 @@ namespace LightImage.Networking.FileSharing.Tests
         [TestMethod]
         public void TestRetryOnce()
         {
-            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicy.Immediate() };
+            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicyConfig.Immediate() };
             var manager = new UploadManager(options, _reader.Object, _logger);
             _reader.SetupSequence(cr => cr.Read(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<int>(), It.IsAny<byte[]>()))
                 .Throws<IOException>()
@@ -152,7 +153,7 @@ namespace LightImage.Networking.FileSharing.Tests
         [TestMethod]
         public void TestSendMissingWhenFileRemoved()
         {
-            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicy.Immediate() };
+            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicyConfig.Immediate() };
             var manager = new UploadManager(options, _reader.Object, _logger);
             _reader.Setup(cr => cr.Read(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<int>(), It.IsAny<byte[]>())).Throws<IOException>();
 
@@ -183,7 +184,7 @@ namespace LightImage.Networking.FileSharing.Tests
         [TestMethod]
         public void TestStopRetryingAfterRemove()
         {
-            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicy.Immediate() };
+            var options = new FileShareOptions { UploadRetryPolicy = RetryPolicyConfig.Immediate() };
             var manager = new UploadManager(options, _reader.Object, _logger);
             _reader.SetupSequence(cr => cr.Read(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<int>(), It.IsAny<byte[]>()))
                 .Throws<IOException>()

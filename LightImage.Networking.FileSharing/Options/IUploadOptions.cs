@@ -1,9 +1,9 @@
-﻿using LightImage.Util.Polly;
+﻿using LightImage.Networking.FileSharing.Policies;
 
 namespace LightImage.Networking.FileSharing.Options
 {
     public interface IUploadOptions
     {
-        RetryPolicy UploadRetryPolicy { get; }
+        RetryPolicyConfig UploadRetryPolicy { get; }
     }
 }

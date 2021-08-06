@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Configuration;
 using Autofac;
+using Microsoft.Extensions.Configuration;
 
 [assembly: InternalsVisibleTo("LightImage.Networking.Discovery.Tests")]
 

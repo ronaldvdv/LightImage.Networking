@@ -45,7 +45,6 @@ namespace LightImage.Networking.Services
             }
         }
 
-
         /// <summary>
         /// Gets the IP address of this node.
         /// </summary>
@@ -64,7 +63,6 @@ namespace LightImage.Networking.Services
         /// Gets the network configuration.
         /// </summary>
         public NetworkOptions Options { get; }
-
 
         /// <summary>
         /// Parse the IP address part from a given host or address (e.g. protocol and/or port).

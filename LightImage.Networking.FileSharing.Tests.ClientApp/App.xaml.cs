@@ -1,10 +1,10 @@
 ﻿using Autofac;
-using LightImage.Networking.FileSharing.Tests.Shared;
 using LightImage.Networking.Services;
 using NetMQ;
 using System.Windows;
 using LightImage.Networking.Discovery;
 using Microsoft.Extensions.Configuration;
+using LightImage.Networking.FileSharing.Tests.Shared;
 
 namespace LightImage.Networking.FileSharing.Tests.ClientApp
 {

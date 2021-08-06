@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
+using LightImage.Collections;
 using LightImage.Networking.Services;
-using LightImage.Util;
-using LightImage.Util.Collections;
 using NetMQ;
 
 namespace LightImage.Networking.Discovery

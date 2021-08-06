@@ -4,7 +4,6 @@ using NetMQ;
 
 namespace LightImage.Networking.Services
 {
-
     /// <summary>
     /// Autofac module for the services functionality.
     /// </summary>

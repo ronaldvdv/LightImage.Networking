@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.30001.183
+VisualStudioVersion = 16.0.31507.150
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.Discovery", "LightImage.Networking.Discovery\LightImage.Networking.Discovery.csproj", "{95458766-6DF3-498B-9B38-C2CC4D4AF44E}"
 EndProject
@@ -15,9 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.FileS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.FileSharing.Tests", "LightImage.Networking.FileSharing.Tests\LightImage.Networking.FileSharing.Tests.csproj", "{48A01192-156B-4BC9-8294-8998EE00287A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightImage.Networking.FileSharing.Tests.ClientApp", "LightImage.Networking.FileSharing.Tests.ClientApp\LightImage.Networking.FileSharing.Tests.ClientApp.csproj", "{3A6EC5C7-1288-4BE5-8BE9-9D55473FB7C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.FileSharing.Tests.ClientApp", "LightImage.Networking.FileSharing.Tests.ClientApp\LightImage.Networking.FileSharing.Tests.ClientApp.csproj", "{3A6EC5C7-1288-4BE5-8BE9-9D55473FB7C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightImage.Networking.FileSharing.Tests.ServerApp", "LightImage.Networking.FileSharing.Tests.Server\LightImage.Networking.FileSharing.Tests.ServerApp.csproj", "{2A8C7B13-075B-4804-8020-FA30B9D0D6CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.FileSharing.Tests.ServerApp", "LightImage.Networking.FileSharing.Tests.Server\LightImage.Networking.FileSharing.Tests.ServerApp.csproj", "{2A8C7B13-075B-4804-8020-FA30B9D0D6CB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightImage.Networking.FileSharing.Tests.Shared", "LightImage.Networking.FileSharing.Tests.Shared\LightImage.Networking.FileSharing.Tests.Shared.csproj", "{153661C9-1FAD-49A4-9216-F8A92E2404ED}"
 EndProject
@@ -28,6 +28,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 		.editorconfig = .editorconfig
 		logo.png = logo.png
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Discovery", "Discovery", "{C13B6E0D-8E50-470C-8DF3-61753246F829}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{534A38F0-7325-4C2B-A9E8-ADE66C454142}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{5F1C05BE-4A32-4A4E-8832-27498D1B9698}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FileSharing", "FileSharing", "{D6C34217-108A-48BC-8BDC-B96E99B3FA19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +86,18 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{95458766-6DF3-498B-9B38-C2CC4D4AF44E} = {C13B6E0D-8E50-470C-8DF3-61753246F829}
+		{8314F261-B370-4DA0-8DC0-E122DD99E371} = {C13B6E0D-8E50-470C-8DF3-61753246F829}
+		{0B98BB7D-E73B-4A37-933C-38E83827149D} = {534A38F0-7325-4C2B-A9E8-ADE66C454142}
+		{D617E969-E891-4A5D-936E-E2CABC8BA588} = {534A38F0-7325-4C2B-A9E8-ADE66C454142}
+		{B1A66ABB-DB71-4DFB-9B49-5CCCE0398B3D} = {D6C34217-108A-48BC-8BDC-B96E99B3FA19}
+		{48A01192-156B-4BC9-8294-8998EE00287A} = {D6C34217-108A-48BC-8BDC-B96E99B3FA19}
+		{3A6EC5C7-1288-4BE5-8BE9-9D55473FB7C3} = {5F1C05BE-4A32-4A4E-8832-27498D1B9698}
+		{2A8C7B13-075B-4804-8020-FA30B9D0D6CB} = {5F1C05BE-4A32-4A4E-8832-27498D1B9698}
+		{153661C9-1FAD-49A4-9216-F8A92E2404ED} = {D6C34217-108A-48BC-8BDC-B96E99B3FA19}
+		{0666E10B-F1E3-40A2-9E8A-B8D194E6CA9A} = {5F1C05BE-4A32-4A4E-8832-27498D1B9698}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9BF4739-748A-4E4E-B089-717A0B8D3D6D}
