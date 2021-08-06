@@ -1,4 +1,4 @@
-﻿using LightImage.Networking.FileSharing.Policies;
+﻿using LightImage.Polly;
 
 namespace LightImage.Networking.FileSharing.Options
 {

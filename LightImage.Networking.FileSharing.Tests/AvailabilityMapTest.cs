@@ -1,4 +1,4 @@
-﻿using LightImage.Networking.FileSharing.Policies;
+﻿using LightImage.Polly;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;

@@ -1,4 +1,4 @@
-﻿using LightImage.Networking.FileSharing.Policies;
+﻿using LightImage.Polly;
 using System;
 using System.Collections.Generic;
 

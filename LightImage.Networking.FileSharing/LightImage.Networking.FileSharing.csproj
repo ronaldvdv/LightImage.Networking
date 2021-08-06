@@ -10,11 +10,12 @@
     <PackageTags>netmq,services,actors,discovery,network,protocol,exchange,files,transfers,p2p</PackageTags>
     <NeutralLanguage>English</NeutralLanguage>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.26</Version>
+    <Version>1.27</Version>
     <PackageIcon>logo.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="LightImage.Polly" Version="0.1.0" />
     <PackageReference Include="Polly" Version="7.2.2" />
   </ItemGroup>
 

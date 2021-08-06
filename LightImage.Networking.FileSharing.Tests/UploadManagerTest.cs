@@ -1,7 +1,7 @@
 using LightImage.Networking.FileSharing.IO;
 using LightImage.Networking.FileSharing.Managers;
 using LightImage.Networking.FileSharing.Options;
-using LightImage.Networking.FileSharing.Policies;
+using LightImage.Polly;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
